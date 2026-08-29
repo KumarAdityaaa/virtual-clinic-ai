@@ -29,6 +29,7 @@ def analyze_symptoms(symptoms):
                 "prediction": condition,
                 "matched_symptoms": list(matched),
                 "priority": rule["priority"],
+                "total_symptoms": len(rule["symptoms"]),
             }
 
     if best_match is None:
@@ -37,13 +38,24 @@ def analyze_symptoms(symptoms):
             "priority": "LOW",
             "confidence": 0.0,
             "matched_symptoms": [],
+            "explanation": "Not enough matching symptoms were found.",
         }
 
-    confidence = round(best_score / len(rule["symptoms"]) * 100, 2)
+    confidence = round(
+        best_score / best_match["total_symptoms"] * 100,
+        2
+    )
+
+    explanation = (
+        f"The result matched {best_score} symptom(s): "
+        + ", ".join(best_match["matched_symptoms"])
+        + "."
+    )
 
     return {
         "prediction": best_match["prediction"],
         "priority": best_match["priority"],
         "confidence": confidence,
         "matched_symptoms": best_match["matched_symptoms"],
+        "explanation": explanation,
     }
