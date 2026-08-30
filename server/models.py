@@ -248,6 +248,13 @@ class Appointment(models.Model):
     appointment_type = models.CharField(max_length=20, default="Offline")
     startTime = models.DateTimeField()
     endTime = models.DateTimeField()
+    ai_analysis = models.OneToOneField(
+    'AIAnalysis',
+    null=True,
+    blank=True,
+    on_delete=models.SET_NULL,
+    related_name='appointment'
+)
 
     def get_populated_fields(self):
         """used to collect form data"""

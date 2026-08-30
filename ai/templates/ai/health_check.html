@@ -6,6 +6,7 @@
 {% block body %}
 
 <div class="panel panel-primary">
+
     <div class="panel-heading">
         Preliminary Symptom Analysis
     </div>
@@ -13,15 +14,26 @@
     <div class="panel-body">
 
         <p>
-            Enter your current symptoms below. The AI will provide a
-            preliminary analysis to assist the doctor during consultation.
+            Enter the patient's current symptoms. Gemini will provide an
+            AI-assisted preliminary assessment for doctor review.
         </p>
 
         <form method="post" id="ai-form">
+
             {% csrf_token %}
 
+            <input
+                type="hidden"
+                name="appointment_id"
+                id="appointment_id"
+                value="{{ appointment_id }}"
+            >
+
             <div class="form-group">
-                <label for="symptoms">Symptoms</label>
+
+                <label for="symptoms">
+                    Symptoms
+                </label>
 
                 <textarea
                     id="symptoms"
@@ -29,43 +41,82 @@
                     class="form-control"
                     rows="5"
                     placeholder="Example: fever, cough, fatigue"
-                    required></textarea>
+                    required>{% if analysis %}{{ analysis.symptoms }}{% endif %}</textarea>
+
             </div>
 
-            <button type="submit" class="btn btn-primary">
+            <button
+                type="submit"
+                class="btn btn-primary"
+                id="analyze-button"
+            >
                 Analyze Symptoms
             </button>
+
         </form>
 
-        <div id="ai-result" style="display:none; margin-top:25px;">
+
+        <div
+            id="ai-result"
+            style="
+                {% if analysis %}
+                    display:block;
+                {% else %}
+                    display:none;
+                {% endif %}
+                margin-top:25px;
+            "
+        >
 
             <hr>
 
-            <h4>AI Preliminary Result</h4>
+            <h4>
+                AI Preliminary Result
+            </h4>
 
             <p>
                 <strong>Possible Condition:</strong>
-                <span id="prediction"></span>
+                <span id="prediction">
+                    {% if analysis %}
+                        {{ analysis.prediction }}
+                    {% endif %}
+                </span>
             </p>
 
             <p>
                 <strong>Priority:</strong>
-                <span id="priority"></span>
+                <span id="priority">
+                    {% if analysis %}
+                        {{ analysis.priority }}
+                    {% endif %}
+                </span>
             </p>
 
             <p>
                 <strong>Confidence:</strong>
-                <span id="confidence"></span>%
+                <span id="confidence">
+                    {% if analysis %}
+                        {{ analysis.confidence }}
+                    {% endif %}
+                </span>%
             </p>
 
             <p>
                 <strong>Why?</strong>
-                <span id="explanation"></span>
+                <span id="explanation">
+                    {% if analysis %}
+                        {{ analysis.explanation }}
+                    {% endif %}
+                </span>
             </p>
 
             <p>
                 <strong>Matched Symptoms:</strong>
-                <span id="matched-symptoms"></span>
+                <span id="matched-symptoms">
+                    {% if analysis %}
+                        {{ analysis.symptoms }}
+                    {% endif %}
+                </span>
             </p>
 
             <div class="alert alert-warning">
@@ -76,34 +127,96 @@
         </div>
 
     </div>
+
 </div>
 
+
 <script>
+
 document.getElementById("ai-form").addEventListener("submit", function(event) {
+
     event.preventDefault();
 
-    const symptoms = document.getElementById("symptoms").value;
+    const symptoms =
+        document.getElementById("symptoms").value;
+
+    const appointmentId =
+        document.getElementById("appointment_id").value;
+
+    const button =
+        document.getElementById("analyze-button");
+
+    button.disabled = true;
+    button.textContent = "Analyzing...";
+
 
     fetch("/ai/analyze/", {
+
         method: "POST",
+
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type":
+                "application/x-www-form-urlencoded"
         },
-        body: "symptoms=" + encodeURIComponent(symptoms)
+
+        body:
+            "symptoms=" +
+            encodeURIComponent(symptoms) +
+
+            "&appointment_id=" +
+            encodeURIComponent(appointmentId)
     })
-    .then(response => response.json())
+
+    .then(response => {
+
+        if (!response.ok) {
+            throw new Error("AI analysis failed.");
+        }
+
+        return response.json();
+    })
+
     .then(data => {
 
-        document.getElementById("prediction").textContent = data.prediction;
-        document.getElementById("priority").textContent = data.priority;
-        document.getElementById("confidence").textContent = data.confidence;
-        document.getElementById("explanation").textContent = data.explanation;
+        document.getElementById("prediction").textContent =
+            data.prediction;
+
+        document.getElementById("priority").textContent =
+            data.priority;
+
+        document.getElementById("confidence").textContent =
+            data.confidence;
+
+        document.getElementById("explanation").textContent =
+            data.explanation;
+
         document.getElementById("matched-symptoms").textContent =
             data.matched_symptoms.join(", ");
 
-        document.getElementById("ai-result").style.display = "block";
+        document.getElementById("ai-result").style.display =
+            "block";
+
+    })
+
+    .catch(error => {
+
+        alert(
+            "Unable to complete AI analysis. Please try again."
+        );
+
+        console.error(error);
+
+    })
+
+    .finally(() => {
+
+        button.disabled = false;
+        button.textContent = "Analyze Symptoms";
+
     });
+
 });
+
 </script>
 
 {% endblock %}

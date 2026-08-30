@@ -38,6 +38,7 @@
                         <th>Status</th>
                         <th data-defaultsort='disabled'>Options</th>
                         <th>Type</th>
+                        <th>AI Analysis</th>
                     </thead>
                     <tbody>
                         {% for appointment in query %}
@@ -73,6 +74,27 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ appointment.appointment_type }}</td>
+                                <td>
+                                    
+                                    {% if user.account.role == 20 %}
+                                        <a
+                                            class="btn btn-info btn-sm"
+                                            href="/ai/?appointment_id={{ appointment.pk }}"
+                                        >
+                                            Review AI
+                                        </a>
+                                    {% else %}
+                                        <a
+                                            class="btn btn-info btn-sm"
+                                            href="/ai/?appointment_id={{ appointment.pk }}"
+                                        >
+                                            View AI
+                                        </a>
+                                    {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">Not analyzed</span>
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
