@@ -4,6 +4,23 @@
 {% block sidebar_profile %}active{% endblock %}
 {% block body_header %}Welcome {{ user.account }}{% endblock %}
 {% block body %}
+{% if user.account.role == 10 %}
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            AI Health Assistant
+        </div>
+        <div class="panel-body">
+            <p>
+                Get an AI-assisted preliminary analysis of your symptoms
+                before your consultation.
+            </p>
+
+            <a href="/ai/" class="btn btn-primary">
+                Start AI Health Check
+            </a>
+        </div>
+    </div>
+{% endif %}
     <p class="lead">Navigate through the VirtualClinic system using the bar on the left-hand side of the browser.</p>
     {% if user.account.role <= 20 %}
         <div class="col-md-7">

@@ -4,6 +4,10 @@ from django.views.decorators.csrf import csrf_exempt
 from .services import analyze_symptoms
 
 
+from django.shortcuts import render
+def health_check(request):
+    return render(request, "ai/health_check.html")
+
 @csrf_exempt
 def analyze(request):
     if request.method != "POST":

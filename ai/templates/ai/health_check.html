@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}AI Health Assistant{% endblock %}
+{% block body_header %}AI Health Assistant{% endblock %}
+
+{% block body %}
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        Preliminary Symptom Analysis
+    </div>
+
+    <div class="panel-body">
+
+        <p>
+            Enter your current symptoms below. The AI will provide a
+            preliminary analysis to assist the doctor during consultation.
+        </p>
+
+        <form method="post" id="ai-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="symptoms">Symptoms</label>
+
+                <textarea
+                    id="symptoms"
+                    name="symptoms"
+                    class="form-control"
+                    rows="5"
+                    placeholder="Example: fever, cough, fatigue"
+                    required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Analyze Symptoms
+            </button>
+        </form>
+
+        <div id="ai-result" style="display:none; margin-top:25px;">
+
+            <hr>
+
+            <h4>AI Preliminary Result</h4>
+
+            <p>
+                <strong>Possible Condition:</strong>
+                <span id="prediction"></span>
+            </p>
+
+            <p>
+                <strong>Priority:</strong>
+                <span id="priority"></span>
+            </p>
+
+            <p>
+                <strong>Confidence:</strong>
+                <span id="confidence"></span>%
+            </p>
+
+            <p>
+                <strong>Why?</strong>
+                <span id="explanation"></span>
+            </p>
+
+            <p>
+                <strong>Matched Symptoms:</strong>
+                <span id="matched-symptoms"></span>
+            </p>
+
+            <div class="alert alert-warning">
+                This is an AI-assisted preliminary result.
+                It is not a final diagnosis. Please consult a doctor.
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.getElementById("ai-form").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const symptoms = document.getElementById("symptoms").value;
+
+    fetch("/ai/analyze/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "symptoms=" + encodeURIComponent(symptoms)
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        document.getElementById("prediction").textContent = data.prediction;
+        document.getElementById("priority").textContent = data.priority;
+        document.getElementById("confidence").textContent = data.confidence;
+        document.getElementById("explanation").textContent = data.explanation;
+        document.getElementById("matched-symptoms").textContent =
+            data.matched_symptoms.join(", ");
+
+        document.getElementById("ai-result").style.display = "block";
+    });
+});
+</script>
+
+{% endblock %}
