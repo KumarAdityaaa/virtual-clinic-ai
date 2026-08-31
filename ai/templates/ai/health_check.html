@@ -17,6 +17,55 @@
             Enter the patient's current symptoms. Gemini will provide an
             AI-assisted preliminary assessment for doctor review.
         </p>
+        {% if patient_context %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Patient Context
+        </div>
+
+        <div class="panel-body">
+
+            <p>
+                <strong>Patient:</strong>
+                {{ patient_context.name }}
+            </p>
+
+            <p>
+                <strong>Blood Type:</strong>
+                {{ patient_context.blood_type }}
+            </p>
+
+            <p>
+                <strong>Speciality:</strong>
+                {{ patient_context.speciality }}
+            </p>
+
+            <p>
+                <strong>Allergies:</strong>
+                {% if patient_context.allergies %}
+                    {{ patient_context.allergies|join:", " }}
+                {% else %}
+                    None recorded
+                {% endif %}
+            </p>
+
+            <p>
+                <strong>Medical History:</strong>
+            </p>
+
+            {% if patient_context.medical_history %}
+                <ul>
+                    {% for item in patient_context.medical_history %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No medical history recorded.</p>
+            {% endif %}
+
+        </div>
+    </div>
+{% endif %}
 
         <form method="post" id="ai-form">
 

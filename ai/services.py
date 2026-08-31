@@ -94,12 +94,19 @@ def _generate_analysis(prompt):
     )
 
 
-def analyze_symptoms(symptoms):
+def analyze_patient(
+    symptoms,
+    medical_history="",
+    allergies="",
+    previous_analyses=None
+):
     symptoms = [
         s.strip().lower()
         for s in symptoms
         if s.strip()
     ]
+
+    previous_analyses = previous_analyses or []
 
     if not symptoms:
         return {
@@ -111,28 +118,51 @@ def analyze_symptoms(symptoms):
             "explanation": "No symptoms were provided."
         }
 
+    previous_context = "None available."
+
+    if previous_analyses:
+        previous_context = "\n".join(
+            [
+                (
+                    f"- {item.get('prediction', 'Unknown')} "
+                    f"(priority: {item.get('priority', 'Unknown')}, "
+                    f"confidence: {item.get('confidence', 0)}%)"
+                )
+                for item in previous_analyses
+            ]
+        )
+
     prompt = f"""
 You are an AI decision-support assistant inside a virtual clinic.
 
-Analyze ONLY the symptoms explicitly listed below.
+Create a PRELIMINARY patient-aware assessment for a doctor.
 
-Patient symptoms:
+CURRENT SYMPTOMS:
 {", ".join(symptoms)}
 
-Important rules:
-- Use ONLY the symptoms listed above.
-- Do not introduce, assume, infer, or invent additional symptoms.
-- matched_symptoms MUST contain only items from the patient symptoms list.
-- Every reason MUST refer only to the supplied symptoms.
-- Do not mention symptoms that were not supplied.
+PATIENT MEDICAL HISTORY:
+{medical_history or "No medical history provided."}
+
+PATIENT ALLERGIES:
+{allergies or "No allergies provided."}
+
+PREVIOUS AI ASSESSMENTS:
+{previous_context}
+
+IMPORTANT RULES:
+- Use the current symptoms as the primary evidence.
+- Use medical history and allergies only as contextual information.
+- Do not invent medical history, allergies, symptoms, test results, or diagnoses.
+- matched_symptoms MUST contain only symptoms supplied in CURRENT SYMPTOMS.
+- Every condition reason must be based on information actually supplied.
+- Do not treat a previous AI result as a confirmed diagnosis.
 - Return 2 to 4 possible conditions when enough information exists.
-- Rank the possibilities from most relevant to least relevant.
-- Give a short reason for each possibility.
-- Assign consultation priority as LOW, MEDIUM, or HIGH.
+- Rank conditions from most relevant to least relevant.
+- Assign priority as LOW, MEDIUM, or HIGH.
 - Return confidence as a decimal between 0 and 1.
-- This is NOT a final diagnosis.
 - Do not prescribe medicines.
 - Do not recommend treatment.
+- Do not claim certainty.
 - Use cautious clinical language.
 - The doctor is responsible for the final diagnosis.
 """
@@ -166,3 +196,10 @@ Important rules:
         )
 
     return result
+
+
+def analyze_symptoms(symptoms):
+    """
+    Backward-compatible wrapper for the existing AI workflow.
+    """
+    return analyze_patient(symptoms)
