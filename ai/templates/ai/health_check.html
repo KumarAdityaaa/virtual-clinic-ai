@@ -71,17 +71,50 @@
             <hr>
 
             <h4>
-                AI Preliminary Result
+                AI Preliminary Assessment
             </h4>
 
+
+            <div class="panel panel-default">
+
+                <div class="panel-heading">
+                    <strong>Possible Conditions</strong>
+                </div>
+
+                <div class="panel-body">
+
+                    <ol id="conditions-list">
+
+                        {% if analysis %}
+                            {% for condition in analysis.possible_conditions %}
+                                <li style="margin-bottom:10px;">
+                                    <strong>
+                                        {{ condition.condition }}
+                                    </strong>
+                                    <br>
+                                    <span>
+                                        {{ condition.reason }}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+
+                    </ol>
+
+                </div>
+
+            </div>
+
+
             <p>
-                <strong>Possible Condition:</strong>
+                <strong>Primary Assessment:</strong>
                 <span id="prediction">
                     {% if analysis %}
                         {{ analysis.prediction }}
                     {% endif %}
                 </span>
             </p>
+
 
             <p>
                 <strong>Priority:</strong>
@@ -92,6 +125,7 @@
                 </span>
             </p>
 
+
             <p>
                 <strong>Confidence:</strong>
                 <span id="confidence">
@@ -100,6 +134,7 @@
                     {% endif %}
                 </span>%
             </p>
+
 
             <p>
                 <strong>Why?</strong>
@@ -110,6 +145,7 @@
                 </span>
             </p>
 
+
             <p>
                 <strong>Matched Symptoms:</strong>
                 <span id="matched-symptoms">
@@ -119,9 +155,10 @@
                 </span>
             </p>
 
+
             <div class="alert alert-warning">
-                This is an AI-assisted preliminary result.
-                It is not a final diagnosis. Please consult a doctor.
+                This is an AI-assisted preliminary assessment.
+                It is not a final diagnosis and must be reviewed by a doctor.
             </div>
 
         </div>
@@ -193,6 +230,47 @@ document.getElementById("ai-form").addEventListener("submit", function(event) {
         document.getElementById("matched-symptoms").textContent =
             data.matched_symptoms.join(", ");
 
+
+        const conditionsList =
+            document.getElementById("conditions-list");
+
+        conditionsList.innerHTML = "";
+
+
+        if (
+            data.possible_conditions &&
+            data.possible_conditions.length > 0
+        ) {
+
+            data.possible_conditions.forEach(function(condition) {
+
+                const item =
+                    document.createElement("li");
+
+                item.style.marginBottom = "10px";
+
+                item.innerHTML =
+                    "<strong>" +
+                    condition.condition +
+                    "</strong><br>" +
+                    condition.reason;
+
+                conditionsList.appendChild(item);
+
+            });
+
+        } else {
+
+            const item =
+                document.createElement("li");
+
+            item.textContent =
+                "No possible conditions returned.";
+
+            conditionsList.appendChild(item);
+        }
+
+
         document.getElementById("ai-result").style.display =
             "block";
 
@@ -218,5 +296,125 @@ document.getElementById("ai-form").addEventListener("submit", function(event) {
 });
 
 </script>
+
+{% if user.account.role == 20 and analysis %}
+    <hr>
+
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            Doctor Review
+        </div>
+
+        <div class="panel-body">
+
+            <div class="form-group">
+                <label for="doctor-review">
+                    AI Assessment Decision
+                </label>
+
+                <select id="doctor-review" class="form-control">
+                    <option value="ACCEPTED">Accept AI Assessment</option>
+                    <option value="MODIFIED">Modify AI Assessment</option>
+                    <option value="REJECTED">Reject AI Assessment</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="final-diagnosis">
+                    Final Diagnosis
+                </label>
+
+                <textarea
+                    id="final-diagnosis"
+                    class="form-control"
+                    rows="4"
+                    placeholder="Enter the doctor's final diagnosis"
+                >{% if analysis.final_diagnosis %}{{ analysis.final_diagnosis }}{% endif %}</textarea>
+            </div>
+
+            <button
+                type="button"
+                class="btn btn-success"
+                id="review-button"
+            >
+                Save Doctor Review
+            </button>
+
+            <span
+                id="review-status"
+                style="margin-left:10px;"
+            ></span>
+
+        </div>
+    </div>
+
+    <script>
+    document.getElementById("review-button").addEventListener(
+        "click",
+        function() {
+
+            const appointmentId =
+                document.getElementById("appointment_id").value;
+
+            const doctorReview =
+                document.getElementById("doctor-review").value;
+
+            const finalDiagnosis =
+                document.getElementById("final-diagnosis").value;
+
+            const button =
+                document.getElementById("review-button");
+
+            const status =
+                document.getElementById("review-status");
+
+            button.disabled = true;
+            button.textContent = "Saving...";
+
+            fetch("/ai/review/", {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/x-www-form-urlencoded"
+                },
+                body:
+                    "appointment_id=" +
+                    encodeURIComponent(appointmentId) +
+                    "&doctor_review=" +
+                    encodeURIComponent(doctorReview) +
+                    "&final_diagnosis=" +
+                    encodeURIComponent(finalDiagnosis)
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                if (!data.success) {
+                    throw new Error(
+                        data.error || "Unable to save review."
+                    );
+                }
+
+                status.textContent =
+                    "Doctor review saved successfully.";
+
+                status.style.color = "green";
+
+            })
+            .catch(error => {
+
+                status.textContent = error.message;
+                status.style.color = "red";
+
+            })
+            .finally(() => {
+
+                button.disabled = false;
+                button.textContent = "Save Doctor Review";
+
+            });
+        }
+    );
+    </script>
+{% endif %}
 
 {% endblock %}

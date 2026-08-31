@@ -411,9 +411,32 @@ class AIAnalysis(models.Model):
     )
     symptoms = models.CharField(max_length=1000)
     prediction = models.CharField(max_length=255)
+    possible_conditions = models.JSONField(default=list)
     priority = models.CharField(max_length=20)
     confidence = models.FloatField(default=0.0)
     explanation = models.CharField(max_length=1000)
+
+    doctor_review = models.CharField(
+        max_length=20,
+        default="PENDING"
+    )
+    final_diagnosis = models.CharField(
+        max_length=500,
+        blank=True,
+        default=""
+    )
+    reviewed_by = models.ForeignKey(
+        Account,
+        null=True,
+        blank=True,
+        related_name="ai_reviews",
+        on_delete=models.SET_NULL
+    )
+    reviewed_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

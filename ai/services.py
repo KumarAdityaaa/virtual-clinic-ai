@@ -26,12 +26,31 @@ def _generate_analysis(prompt):
                         response_schema={
                             "type": "object",
                             "properties": {
-                                "prediction": {
-                                    "type": "string"
+                                "possible_conditions": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "condition": {
+                                                "type": "string"
+                                            },
+                                            "reason": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "condition",
+                                            "reason"
+                                        ]
+                                    }
                                 },
                                 "priority": {
                                     "type": "string",
-                                    "enum": ["LOW", "MEDIUM", "HIGH"]
+                                    "enum": [
+                                        "LOW",
+                                        "MEDIUM",
+                                        "HIGH"
+                                    ]
                                 },
                                 "confidence": {
                                     "type": "number"
@@ -47,7 +66,7 @@ def _generate_analysis(prompt):
                                 }
                             },
                             "required": [
-                                "prediction",
+                                "possible_conditions",
                                 "priority",
                                 "confidence",
                                 "matched_symptoms",
@@ -58,7 +77,10 @@ def _generate_analysis(prompt):
                 )
 
             except ServerError as error:
-                if getattr(error, "code", None) == 503 and attempt == 0:
+                if (
+                    getattr(error, "code", None) == 503
+                    and attempt == 0
+                ):
                     time.sleep(2)
                     continue
 
@@ -67,40 +89,52 @@ def _generate_analysis(prompt):
 
                 break
 
-    raise RuntimeError("Gemini is temporarily unavailable.")
+    raise RuntimeError(
+        "Gemini is temporarily unavailable."
+    )
 
 
 def analyze_symptoms(symptoms):
-    symptoms = [s.strip() for s in symptoms if s.strip()]
+    symptoms = [
+        s.strip().lower()
+        for s in symptoms
+        if s.strip()
+    ]
 
     if not symptoms:
         return {
             "prediction": "Insufficient information",
+            "possible_conditions": [],
             "priority": "LOW",
             "confidence": 0.0,
             "matched_symptoms": [],
-            "explanation": "No symptoms were provided.",
+            "explanation": "No symptoms were provided."
         }
 
     prompt = f"""
 You are an AI decision-support assistant inside a virtual clinic.
 
-Analyze the patient's symptoms and return a PRELIMINARY assessment for a
-doctor to review.
+Analyze ONLY the symptoms explicitly listed below.
 
 Patient symptoms:
 {", ".join(symptoms)}
 
-Rules:
-- This is NOT a final diagnosis.
-- Do not prescribe medicines.
-- Do not claim certainty.
-- Suggest a few possible conditions based only on the supplied symptoms.
+Important rules:
+- Use ONLY the symptoms listed above.
+- Do not introduce, assume, infer, or invent additional symptoms.
+- matched_symptoms MUST contain only items from the patient symptoms list.
+- Every reason MUST refer only to the supplied symptoms.
+- Do not mention symptoms that were not supplied.
+- Return 2 to 4 possible conditions when enough information exists.
+- Rank the possibilities from most relevant to least relevant.
+- Give a short reason for each possibility.
 - Assign consultation priority as LOW, MEDIUM, or HIGH.
 - Return confidence as a decimal between 0 and 1.
-- List only symptoms supplied by the patient in matched_symptoms.
-- Explain briefly why the symptoms influenced the result.
-- Keep the response concise and clinically cautious.
+- This is NOT a final diagnosis.
+- Do not prescribe medicines.
+- Do not recommend treatment.
+- Use cautious clinical language.
+- The doctor is responsible for the final diagnosis.
 """
 
     response = _generate_analysis(prompt)
@@ -112,8 +146,22 @@ Rules:
     )
 
     if isinstance(result, dict):
+
+        possible_conditions = result.get(
+            "possible_conditions",
+            []
+        )
+
+        if possible_conditions:
+            result["prediction"] = possible_conditions[0].get(
+                "condition",
+                "Preliminary assessment"
+            )
+        else:
+            result["prediction"] = "Insufficient information"
+
         result["confidence"] = round(
-            float(result["confidence"]) * 100,
+            float(result.get("confidence", 0.0)) * 100,
             2
         )
 
