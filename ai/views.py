@@ -7,6 +7,84 @@ from server.models import Account, Appointment, AIAnalysis, MedicalInfo
 from .services import analyze_patient
 
 
+def build_patient_context(patient):
+    try:
+        medical_info = MedicalInfo.objects.get(
+            account=patient
+        )
+    except MedicalInfo.DoesNotExist:
+        medical_info = None
+
+    medical_history = []
+
+    if medical_info:
+        if medical_info.bloodType:
+            medical_history.append(
+                f"Blood type: {medical_info.bloodType}"
+            )
+
+        if medical_info.asthma:
+            medical_history.append(
+                "History of asthma"
+            )
+
+        if medical_info.diabetes:
+            medical_history.append(
+                "History of diabetes"
+            )
+
+        if medical_info.stroke:
+            medical_history.append(
+                "History of stroke"
+            )
+
+        if medical_info.alzheimer:
+            medical_history.append(
+                "History of Alzheimer's disease"
+            )
+
+        if medical_info.comments:
+            medical_history.append(
+                medical_info.comments
+            )
+
+    allergies = []
+
+    if patient.profile.allergies:
+        allergies.append(
+            patient.profile.allergies.strip()
+        )
+
+    if medical_info and medical_info.allergy:
+        allergies.append(
+            medical_info.allergy.strip()
+        )
+
+    allergies = list(
+        dict.fromkeys(
+            allergy
+            for allergy in allergies
+            if allergy
+        )
+    )
+
+    return {
+        "name": str(patient.profile),
+        "blood_type": (
+            medical_info.bloodType
+            if medical_info
+            else "Not provided"
+        ),
+        "medical_history": medical_history,
+        "allergies": allergies,
+        "speciality": (
+            patient.profile.speciality.name
+            if patient.profile.speciality
+            else "Not specified"
+        ),
+    }
+
+
 def health_check(request):
     if not request.user.is_authenticated:
         return JsonResponse(
@@ -18,6 +96,7 @@ def health_check(request):
     appointment = None
     analysis = None
     patient_context = None
+    previous_analyses = []
 
     if appointment_id:
         try:
@@ -26,7 +105,9 @@ def health_check(request):
                 "patient",
                 "doctor",
                 "symptom"
-            ).get(pk=int(appointment_id))
+            ).get(
+                pk=int(appointment_id)
+            )
 
             if request.user.account.role == Account.ACCOUNT_PATIENT:
                 if appointment.patient != request.user.account:
@@ -60,83 +141,30 @@ def health_check(request):
             analysis = appointment.ai_analysis
             patient = appointment.patient
 
-            try:
-                medical_info = MedicalInfo.objects.get(
-                    account=patient
-                )
-            except MedicalInfo.DoesNotExist:
-                medical_info = None
-
-            medical_history = []
-
-            if medical_info:
-                if medical_info.bloodType:
-                    medical_history.append(
-                        f"Blood type: {medical_info.bloodType}"
-                    )
-
-                if medical_info.asthma:
-                    medical_history.append(
-                        "History of asthma"
-                    )
-
-                if medical_info.diabetes:
-                    medical_history.append(
-                        "History of diabetes"
-                    )
-
-                if medical_info.stroke:
-                    medical_history.append(
-                        "History of stroke"
-                    )
-
-                if medical_info.alzheimer:
-                    medical_history.append(
-                        "History of Alzheimer's disease"
-                    )
-
-                if medical_info.comments:
-                    medical_history.append(
-                        medical_info.comments
-                    )
-
-            allergies = []
-
-            if patient.profile.allergies:
-                allergies.append(
-                    patient.profile.allergies.strip()
-                )
-
-            if medical_info and medical_info.allergy:
-                allergies.append(
-                    medical_info.allergy.strip()
-                )
-
-            allergies = list(
-                dict.fromkeys(
-                    allergy
-                    for allergy in allergies
-                    if allergy
-                )
+            patient_context = build_patient_context(
+                patient
             )
 
-            patient_context = {
-                "name": str(patient.profile),
-                "blood_type": (
-                    medical_info.bloodType
-                    if medical_info
-                    else "Not provided"
-                ),
-                "medical_history": medical_history,
-                "allergies": allergies,
-                "speciality": (
-                    patient.profile.speciality.name
-                    if patient.profile.speciality
-                    else "Not specified"
-                ),
-            }
+            previous_analyses = list(
+                AIAnalysis.objects.filter(
+                    account=patient
+                )
+                .exclude(
+                    id=appointment.ai_analysis_id
+                )
+                .order_by("-created")
+                .values(
+                    "prediction",
+                    "priority",
+                    "confidence",
+                    "created"
+                )[:5]
+            )
 
-        except (ValueError, Appointment.DoesNotExist):
+        except (
+            ValueError,
+            Appointment.DoesNotExist
+        ):
             return JsonResponse(
                 {"error": "Appointment not found."},
                 status=404
@@ -150,6 +178,7 @@ def health_check(request):
             "appointment": appointment,
             "analysis": analysis,
             "patient_context": patient_context,
+            "previous_analyses": previous_analyses,
         }
     )
 
@@ -210,7 +239,6 @@ def analyze(request):
         )
 
     if request.user.account.role == Account.ACCOUNT_PATIENT:
-
         if appointment.patient != request.user.account:
             return JsonResponse(
                 {
@@ -221,7 +249,6 @@ def analyze(request):
             )
 
     elif request.user.account.role == Account.ACCOUNT_DOCTOR:
-
         if appointment.doctor != request.user.account:
             return JsonResponse(
                 {
@@ -313,7 +340,9 @@ def analyze(request):
         )
     )
 
-    allergies = "; ".join(allergy_values)
+    allergies = "; ".join(
+        allergy_values
+    )
 
     previous_analyses = list(
         AIAnalysis.objects.filter(
