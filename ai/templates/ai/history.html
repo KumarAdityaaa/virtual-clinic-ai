@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}
+    AI History
+{% endblock %}
+
+{% block body_header %}
+    AI Health History
+{% endblock %}
+
+{% block body %}
+
+<div class="panel panel-primary">
+
+    <div class="panel-heading">
+        AI Analysis History
+    </div>
+
+    <div class="panel-body">
+
+        {% if patient %}
+
+            <p class="lead">
+                Previous AI-assisted assessments for
+                <strong>{{ patient.profile }}</strong>.
+            </p>
+
+        {% else %}
+
+            <p class="lead">
+                AI assessments associated with your appointments.
+            </p>
+
+        {% endif %}
+
+
+        {% if analyses %}
+
+            <table
+                id="ai-history-table"
+                class="table table-hover table-striped table-bordered"
+            >
+
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Patient</th>
+                        <th>Symptoms</th>
+                        <th>Primary Assessment</th>
+                        <th>Priority</th>
+                        <th>Confidence</th>
+                        <th>Doctor Review</th>
+                        <th>Final Diagnosis</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+
+                <tbody>
+
+                    {% for analysis in analyses %}
+
+                        <tr>
+
+                            <td>
+                                {{ analysis.created }}
+                            </td>
+
+
+                            <td>
+
+                                {% if patient %}
+
+                                    {{ patient.profile }}
+
+                                {% else %}
+
+                                    {{ analysis.account.profile }}
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+                                {{ analysis.symptoms }}
+                            </td>
+
+
+                            <td>
+                                {{ analysis.prediction }}
+                            </td>
+
+
+                            <td>
+                                {{ analysis.priority }}
+                            </td>
+
+
+                            <td>
+                                {{ analysis.confidence }}%
+                            </td>
+
+
+                            <td>
+
+                                {% if analysis.doctor_review == "ACCEPTED" %}
+
+                                    <span class="text-success">
+                                        Accepted
+                                    </span>
+
+                                {% elif analysis.doctor_review == "MODIFIED" %}
+
+                                    <span class="text-warning">
+                                        Modified
+                                    </span>
+
+                                {% elif analysis.doctor_review == "REJECTED" %}
+
+                                    <span class="text-danger">
+                                        Rejected
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        Pending
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if analysis.final_diagnosis %}
+
+                                    {{ analysis.final_diagnosis }}
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        Not recorded
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td>
+
+                                {% if analysis.appointment %}
+
+                                    <a
+                                        href="/ai/?appointment_id={{ analysis.appointment.pk }}"
+                                        class="btn btn-info btn-sm"
+                                    >
+                                        View Analysis
+                                    </a>
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        Unavailable
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        {% else %}
+
+            <div class="alert alert-info">
+                No AI assessments are available yet.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<script>
+
+$(document).ready(function() {
+
+    $('#ai-history-table').DataTable();
+
+});
+
+</script>
+
+{% endblock %}

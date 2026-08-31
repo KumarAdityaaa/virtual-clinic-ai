@@ -482,3 +482,70 @@ def review(request):
             ),
         }
     )
+
+    
+
+def history(request):
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {"error": "Login required"},
+            status=401
+        )
+
+    account = request.user.account
+
+    if account.role == Account.ACCOUNT_PATIENT:
+
+        analyses = (
+            AIAnalysis.objects
+            .filter(
+                account=account
+            )
+            .select_related(
+                "reviewed_by"
+            )
+            .prefetch_related(
+                "appointment"
+            )
+            .order_by("-created")
+        )
+
+        patient = account
+
+    elif account.role == Account.ACCOUNT_DOCTOR:
+
+        analyses = (
+            AIAnalysis.objects
+            .filter(
+                appointment__doctor=account
+            )
+            .select_related(
+                "account",
+                "reviewed_by"
+            )
+            .prefetch_related(
+                "appointment"
+            )
+            .order_by("-created")
+            .distinct()
+        )
+
+        patient = None
+
+    else:
+        return JsonResponse(
+            {
+                "error":
+                    "You do not have permission to view AI history."
+            },
+            status=403
+        )
+
+    return render(
+        request,
+        "ai/history.html",
+        {
+            "analyses": analyses,
+            "patient": patient,
+        }
+    )

@@ -1,16 +1,21 @@
 import os
 import time
 
+from dotenv import load_dotenv
+
 from google import genai
 from google.genai import types
 from google.genai.errors import ServerError
 
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+load_dotenv()
+
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
+)
 
 PRIMARY_MODEL = "gemini-2.5-flash"
 FALLBACK_MODEL = "gemini-2.5-flash-lite"
-
 
 def _generate_analysis(prompt):
     models = [PRIMARY_MODEL, FALLBACK_MODEL]
