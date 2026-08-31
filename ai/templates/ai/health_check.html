@@ -1,16 +1,13 @@
 {% extends "base.html" %}
 
 {% block title %}AI Health Assistant{% endblock %}
-{% block body_header %}AI Health Assistant{% endblock %}
+
+{% block body_header %}
+AI Health Assistant
+{% endblock %}
 
 {% block body %}
-<a
-    href="/ai/history/"
-    class="btn btn-default btn-sm"
-    style="margin-bottom:15px;"
->
-    AI History
-</a>
+
 <div class="panel panel-primary">
 
     <div class="panel-heading">
@@ -58,7 +55,9 @@
                         {% else %}
                             None recorded
                         {% endif %}
+
                     </p>
+
 
                     <p>
                         <strong>Medical History:</strong>
@@ -104,6 +103,7 @@
                 value="{{ appointment_id }}"
             >
 
+
             <div class="form-group">
 
                 <label for="symptoms">
@@ -121,6 +121,7 @@
 
             </div>
 
+
             <button
                 type="submit"
                 class="btn btn-primary"
@@ -130,6 +131,18 @@
             </button>
 
         </form>
+
+
+        <p style="margin-top:15px;">
+
+            <a
+                href="/ai/history/"
+                class="btn btn-default btn-sm"
+            >
+                AI History
+            </a>
+
+        </p>
 
 
         {% if user.account.role == 20 and patient_context %}
@@ -150,6 +163,7 @@
                         {{ patient_context.name }}
                     </p>
 
+
                     <p>
                         <strong>Current Symptoms:</strong>
 
@@ -164,6 +178,7 @@
                         </span>
                     </p>
 
+
                     <p>
                         <strong>Known Allergies:</strong>
 
@@ -175,9 +190,11 @@
 
                     </p>
 
+
                     <p>
                         <strong>Relevant Medical History:</strong>
                     </p>
+
 
                     {% if patient_context.medical_history %}
 
@@ -232,11 +249,13 @@
                     {% else %}
 
                         <p>
+
                             <strong>
                                 Previous AI Assessments:
                             </strong>
 
                             None available.
+
                         </p>
 
                     {% endif %}
@@ -262,6 +281,7 @@
 
             <hr>
 
+
             <h4>
                 AI Preliminary Assessment
             </h4>
@@ -270,10 +290,13 @@
             <div class="panel panel-default">
 
                 <div class="panel-heading">
+
                     <strong>
                         Possible Conditions
                     </strong>
+
                 </div>
+
 
                 <div class="panel-body">
 
@@ -414,27 +437,36 @@
 
             <hr>
 
+
             <div class="panel panel-success">
 
                 <div class="panel-heading">
                     Doctor Review
                 </div>
 
+
                 <div class="panel-body">
 
                     <p>
-                        <strong>Current Review Status:</strong>
+
+                        <strong>
+                            Current Review Status:
+                        </strong>
 
                         <span id="review-status-label">
 
                             {% if analysis.doctor_review == "PENDING" %}
                                 Pending
+
                             {% elif analysis.doctor_review == "ACCEPTED" %}
                                 Accepted
+
                             {% elif analysis.doctor_review == "MODIFIED" %}
                                 Modified
+
                             {% elif analysis.doctor_review == "REJECTED" %}
                                 Rejected
+
                             {% else %}
                                 {{ analysis.doctor_review }}
                             {% endif %}
@@ -447,8 +479,13 @@
                     {% if analysis.reviewed_at %}
 
                         <p>
-                            <strong>Reviewed At:</strong>
+
+                            <strong>
+                                Reviewed At:
+                            </strong>
+
                             {{ analysis.reviewed_at }}
+
                         </p>
 
                     {% endif %}
@@ -459,6 +496,7 @@
                         <label for="doctor-review">
                             AI Assessment Decision
                         </label>
+
 
                         <select
                             id="doctor-review"
@@ -474,6 +512,7 @@
                                 Accept AI Assessment
                             </option>
 
+
                             <option
                                 value="MODIFIED"
                                 {% if analysis.doctor_review == "MODIFIED" %}
@@ -482,6 +521,7 @@
                             >
                                 Modify AI Assessment
                             </option>
+
 
                             <option
                                 value="REJECTED"
@@ -502,6 +542,7 @@
                         <label for="final-diagnosis">
                             Final Diagnosis
                         </label>
+
 
                         <textarea
                             id="final-diagnosis"
@@ -536,76 +577,119 @@
 
                 document
                     .getElementById("review-button")
-                    .addEventListener("click", function() {
+                    .addEventListener(
+                        "click",
+                        function() {
 
-                        const appointmentId =
-                            document.getElementById(
-                                "appointment_id"
-                            ).value;
-
-                        const doctorReview =
-                            document.getElementById(
-                                "doctor-review"
-                            ).value;
-
-                        const finalDiagnosis =
-                            document.getElementById(
-                                "final-diagnosis"
-                            ).value;
-
-                        const button =
-                            document.getElementById(
-                                "review-button"
-                            );
-
-                        const status =
-                            document.getElementById(
-                                "review-status"
-                            );
-
-                        const statusLabel =
-                            document.getElementById(
-                                "review-status-label"
-                            );
-
-                        button.disabled = true;
-                        button.textContent =
-                            "Saving...";
+                            const appointmentId =
+                                document
+                                    .getElementById(
+                                        "appointment_id"
+                                    )
+                                    .value;
 
 
-                        fetch("/ai/review/", {
+                            const doctorReview =
+                                document
+                                    .getElementById(
+                                        "doctor-review"
+                                    )
+                                    .value;
 
-                            method: "POST",
 
-                            headers: {
-                                "Content-Type":
-                                    "application/x-www-form-urlencoded"
-                            },
+                            const finalDiagnosis =
+                                document
+                                    .getElementById(
+                                        "final-diagnosis"
+                                    )
+                                    .value;
 
-                            body:
-                                "appointment_id=" +
-                                encodeURIComponent(
-                                    appointmentId
-                                ) +
 
-                                "&doctor_review=" +
-                                encodeURIComponent(
-                                    doctorReview
-                                ) +
+                            const button =
+                                document
+                                    .getElementById(
+                                        "review-button"
+                                    );
 
-                                "&final_diagnosis=" +
-                                encodeURIComponent(
-                                    finalDiagnosis
-                                )
 
-                        })
+                            const status =
+                                document
+                                    .getElementById(
+                                        "review-status"
+                                    );
 
-                        .then(response => {
 
-                            if (!response.ok) {
+                            const statusLabel =
+                                document
+                                    .getElementById(
+                                        "review-status-label"
+                                    );
 
-                                return response.json().then(
-                                    data => {
+
+                            button.disabled = true;
+
+                            button.textContent =
+                                "Saving...";
+
+
+                            fetch(
+                                "/ai/review/",
+                                {
+                                    method: "POST",
+
+                                    headers: {
+                                        "Content-Type":
+                                            "application/x-www-form-urlencoded"
+                                    },
+
+                                    body:
+                                        "appointment_id=" +
+                                        encodeURIComponent(
+                                            appointmentId
+                                        ) +
+
+                                        "&doctor_review=" +
+                                        encodeURIComponent(
+                                            doctorReview
+                                        ) +
+
+                                        "&final_diagnosis=" +
+                                        encodeURIComponent(
+                                            finalDiagnosis
+                                        )
+                                }
+                            )
+
+                            .then(
+                                response => {
+
+                                    return response.json()
+                                        .then(
+                                            data => {
+
+                                                if (
+                                                    !response.ok
+                                                ) {
+
+                                                    throw new Error(
+                                                        data.error ||
+                                                        "Unable to save review."
+                                                    );
+
+                                                }
+
+                                                return data;
+
+                                            }
+                                        );
+
+                                }
+                            )
+
+                            .then(
+                                data => {
+
+                                    if (!data.success) {
 
                                         throw new Error(
                                             data.error ||
@@ -613,85 +697,80 @@
                                         );
 
                                     }
-                                );
 
-                            }
 
-                            return response.json();
+                                    let readableStatus =
+                                        "Pending";
 
-                        })
 
-                        .then(data => {
+                                    if (
+                                        data.doctor_review ===
+                                        "ACCEPTED"
+                                    ) {
 
-                            if (!data.success) {
+                                        readableStatus =
+                                            "Accepted";
 
-                                throw new Error(
-                                    data.error ||
-                                    "Unable to save review."
-                                );
+                                    }
+                                    else if (
+                                        data.doctor_review ===
+                                        "MODIFIED"
+                                    ) {
 
-                            }
+                                        readableStatus =
+                                            "Modified";
 
-                            let readableStatus =
-                                "Pending";
+                                    }
+                                    else if (
+                                        data.doctor_review ===
+                                        "REJECTED"
+                                    ) {
 
-                            if (
-                                data.doctor_review ===
-                                "ACCEPTED"
-                            ) {
+                                        readableStatus =
+                                            "Rejected";
 
-                                readableStatus =
-                                    "Accepted";
+                                    }
 
-                            } else if (
-                                data.doctor_review ===
-                                "MODIFIED"
-                            ) {
 
-                                readableStatus =
-                                    "Modified";
+                                    statusLabel.textContent =
+                                        readableStatus;
 
-                            } else if (
-                                data.doctor_review ===
-                                "REJECTED"
-                            ) {
 
-                                readableStatus =
-                                    "Rejected";
+                                    status.textContent =
+                                        "Doctor review saved successfully.";
 
-                            }
 
-                            statusLabel.textContent =
-                                readableStatus;
+                                    status.style.color =
+                                        "green";
 
-                            status.textContent =
-                                "Doctor review saved successfully.";
+                                }
+                            )
 
-                            status.style.color =
-                                "green";
+                            .catch(
+                                error => {
 
-                        })
+                                    status.textContent =
+                                        error.message;
 
-                        .catch(error => {
+                                    status.style.color =
+                                        "red";
 
-                            status.textContent =
-                                error.message;
+                                }
+                            )
 
-                            status.style.color =
-                                "red";
+                            .finally(
+                                () => {
 
-                        })
+                                    button.disabled = false;
 
-                        .finally(() => {
+                                    button.textContent =
+                                        "Save Doctor Review";
 
-                            button.disabled = false;
+                                }
+                            );
 
-                            button.textContent =
-                                "Save Doctor Review";
-
-                        });
-
-                    });
+                        }
+                    );
 
             </script>
 
@@ -706,224 +785,333 @@
 
 document
     .getElementById("ai-form")
-    .addEventListener("submit", function(event) {
+    .addEventListener(
+        "submit",
+        function(event) {
 
-        event.preventDefault();
-
-        const symptoms =
-            document.getElementById(
-                "symptoms"
-            ).value;
-
-        const appointmentId =
-            document.getElementById(
-                "appointment_id"
-            ).value;
-
-        const button =
-            document.getElementById(
-                "analyze-button"
-            );
-
-        button.disabled = true;
-
-        button.textContent =
-            "Analyzing...";
+            event.preventDefault();
 
 
-        fetch("/ai/analyze/", {
-
-            method: "POST",
-
-            headers: {
-                "Content-Type":
-                    "application/x-www-form-urlencoded"
-            },
-
-            body:
-                "symptoms=" +
-                encodeURIComponent(
-                    symptoms
-                ) +
-
-                "&appointment_id=" +
-                encodeURIComponent(
-                    appointmentId
-                )
-
-        })
-
-        .then(response => {
-
-            if (!response.ok) {
-
-                return response.json().then(
-                    data => {
-
-                        throw new Error(
-                            data.error ||
-                            "AI analysis failed."
-                        );
-
-                    }
-                );
-
-            }
-
-            return response.json();
-
-        })
-
-        .then(data => {
-
-            document.getElementById(
-                "prediction"
-            ).textContent =
-                data.prediction;
+            const symptoms =
+                document
+                    .getElementById(
+                        "symptoms"
+                    )
+                    .value;
 
 
-            document.getElementById(
-                "priority"
-            ).textContent =
-                data.priority;
+            const appointmentId =
+                document
+                    .getElementById(
+                        "appointment_id"
+                    )
+                    .value;
 
 
-            document.getElementById(
-                "confidence"
-            ).textContent =
-                data.confidence;
-
-
-            document.getElementById(
-                "explanation"
-            ).textContent =
-                data.explanation;
-
-
-            document.getElementById(
-                "matched-symptoms"
-            ).textContent =
-                data.matched_symptoms.join(
-                    ", "
-                );
-
-
-            const briefingSymptoms =
-                document.getElementById(
-                    "briefing-symptoms"
-                );
-
-
-            if (briefingSymptoms) {
-
-                briefingSymptoms.textContent =
-                    data.matched_symptoms.join(
-                        ", "
+            const button =
+                document
+                    .getElementById(
+                        "analyze-button"
                     );
 
-            }
 
-
-            const conditionsList =
-                document.getElementById(
-                    "conditions-list"
-                );
-
-            conditionsList.innerHTML = "";
-
-
-            if (
-                data.possible_conditions &&
-                data.possible_conditions.length > 0
-            ) {
-
-                data.possible_conditions.forEach(
-                    function(condition) {
-
-                        const item =
-                            document.createElement(
-                                "li"
-                            );
-
-                        item.style.marginBottom =
-                            "10px";
-
-
-                        const title =
-                            document.createElement(
-                                "strong"
-                            );
-
-                        title.textContent =
-                            condition.condition;
-
-
-                        const reason =
-                            document.createElement(
-                                "span"
-                            );
-
-                        reason.textContent =
-                            condition.reason;
-
-
-                        item.appendChild(title);
-
-                        item.appendChild(
-                            document.createElement(
-                                "br"
-                            )
-                        );
-
-                        item.appendChild(reason);
-
-                        conditionsList.appendChild(
-                            item
-                        );
-
-                    }
-                );
-
-            } else {
-
-                const item =
-                    document.createElement(
-                        "li"
-                    );
-
-                item.textContent =
-                    "No possible conditions returned.";
-
-                conditionsList.appendChild(item);
-
-            }
-
-
-            document.getElementById(
-                "ai-result"
-            ).style.display =
-                "block";
-
-        })
-
-        .catch(error => {
-
-            alert(error.message);
-
-            console.error(error);
-
-        })
-
-        .finally(() => {
-
-            button.disabled = false;
+            button.disabled = true;
 
             button.textContent =
-                "Analyze Symptoms";
+                "Analyzing...";
 
-        });
 
-    });
+            fetch(
+                "/ai/analyze/",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/x-www-form-urlencoded"
+                    },
+
+                    body:
+                        "symptoms=" +
+                        encodeURIComponent(
+                            symptoms
+                        ) +
+
+                        "&appointment_id=" +
+                        encodeURIComponent(
+                            appointmentId
+                        )
+                }
+            )
+
+            .then(
+                response => {
+
+                    return response.json()
+                        .then(
+                            data => {
+
+                                if (!response.ok) {
+
+                                    const error =
+                                        new Error(
+                                            data.error ||
+                                            "AI analysis failed."
+                                        );
+
+                                    error.status =
+                                        response.status;
+
+                                    throw error;
+
+                                }
+
+                                return data;
+
+                            }
+                        );
+
+                }
+            )
+
+            .then(
+                data => {
+
+                    document
+                        .getElementById(
+                            "prediction"
+                        )
+                        .textContent =
+                        data.prediction;
+
+
+                    document
+                        .getElementById(
+                            "priority"
+                        )
+                        .textContent =
+                        data.priority;
+
+
+                    document
+                        .getElementById(
+                            "confidence"
+                        )
+                        .textContent =
+                        data.confidence;
+
+
+                    document
+                        .getElementById(
+                            "explanation"
+                        )
+                        .textContent =
+                        data.explanation;
+
+
+                    document
+                        .getElementById(
+                            "matched-symptoms"
+                        )
+                        .textContent =
+                        data.matched_symptoms.join(
+                            ", "
+                        );
+
+
+                    const briefingSymptoms =
+                        document
+                            .getElementById(
+                                "briefing-symptoms"
+                            );
+
+
+                    if (briefingSymptoms) {
+
+                        briefingSymptoms.textContent =
+                            data.matched_symptoms.join(
+                                ", "
+                            );
+
+                    }
+
+
+                    const conditionsList =
+                        document
+                            .getElementById(
+                                "conditions-list"
+                            );
+
+
+                    conditionsList.innerHTML =
+                        "";
+
+
+                    if (
+                        data.possible_conditions &&
+                        data.possible_conditions.length > 0
+                    ) {
+
+                        data.possible_conditions
+                            .forEach(
+                                function(condition) {
+
+                                    const item =
+                                        document
+                                            .createElement(
+                                                "li"
+                                            );
+
+
+                                    item.style.marginBottom =
+                                        "10px";
+
+
+                                    const title =
+                                        document
+                                            .createElement(
+                                                "strong"
+                                            );
+
+
+                                    title.textContent =
+                                        condition.condition;
+
+
+                                    const reason =
+                                        document
+                                            .createElement(
+                                                "span"
+                                            );
+
+
+                                    reason.textContent =
+                                        condition.reason;
+
+
+                                    item.appendChild(
+                                        title
+                                    );
+
+
+                                    item.appendChild(
+                                        document
+                                            .createElement(
+                                                "br"
+                                            )
+                                    );
+
+
+                                    item.appendChild(
+                                        reason
+                                    );
+
+
+                                    conditionsList
+                                        .appendChild(
+                                            item
+                                        );
+
+                                }
+                            );
+
+                    }
+                    else {
+
+                        const item =
+                            document
+                                .createElement(
+                                    "li"
+                                );
+
+
+                        item.textContent =
+                            "No possible conditions returned.";
+
+
+                        conditionsList
+                            .appendChild(
+                                item
+                            );
+
+                    }
+
+
+                    document
+                        .getElementById(
+                            "ai-result"
+                        )
+                        .style.display =
+                        "block";
+
+                }
+            )
+
+            .catch(
+                error => {
+
+                    console.error(
+                        "AI analysis error:",
+                        error
+                    );
+
+
+                    if (
+                        error.status === 503
+                    ) {
+
+                        alert(
+                            "The AI service is temporarily unavailable. " +
+                            "Please try again in a moment."
+                        );
+
+                    }
+                    else if (
+                        error.status === 401
+                    ) {
+
+                        alert(
+                            "Your session has expired. " +
+                            "Please log in again."
+                        );
+
+                    }
+                    else if (
+                        error.status === 403
+                    ) {
+
+                        alert(
+                            "You do not have permission to " +
+                            "analyze this appointment."
+                        );
+
+                    }
+                    else {
+
+                        alert(
+                            error.message ||
+                            "Unable to complete AI analysis. " +
+                            "Please try again."
+                        );
+
+                    }
+
+                }
+            )
+
+            .finally(
+                () => {
+
+                    button.disabled = false;
+
+                    button.textContent =
+                        "Analyze Symptoms";
+
+                }
+            );
+
+        }
+    );
 
 </script>
 

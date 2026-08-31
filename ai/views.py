@@ -1,9 +1,15 @@
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from server.models import Account, Appointment, AIAnalysis, MedicalInfo
+from server.models import (
+    Account,
+    Appointment,
+    AIAnalysis,
+    MedicalInfo,
+)
+
 from .services import analyze_patient
 
 
@@ -92,7 +98,12 @@ def health_check(request):
             status=401
         )
 
-    appointment_id = request.GET.get("appointment_id")
+    appointment_id = request.GET.get(
+        "appointment_id"
+    )
+    if not appointment_id:
+        return redirect("/appointment/list/")
+
     appointment = None
     analysis = None
     patient_context = None
@@ -110,6 +121,7 @@ def health_check(request):
             )
 
             if request.user.account.role == Account.ACCOUNT_PATIENT:
+
                 if appointment.patient != request.user.account:
                     return JsonResponse(
                         {
@@ -120,6 +132,7 @@ def health_check(request):
                     )
 
             elif request.user.account.role == Account.ACCOUNT_DOCTOR:
+
                 if appointment.doctor != request.user.account:
                     return JsonResponse(
                         {
@@ -239,6 +252,7 @@ def analyze(request):
         )
 
     if request.user.account.role == Account.ACCOUNT_PATIENT:
+
         if appointment.patient != request.user.account:
             return JsonResponse(
                 {
@@ -249,6 +263,7 @@ def analyze(request):
             )
 
     elif request.user.account.role == Account.ACCOUNT_DOCTOR:
+
         if appointment.doctor != request.user.account:
             return JsonResponse(
                 {
@@ -279,6 +294,7 @@ def analyze(request):
     medical_history = []
 
     if medical_info:
+
         if medical_info.bloodType:
             medical_history.append(
                 f"Blood type: {medical_info.bloodType}"
@@ -359,12 +375,27 @@ def analyze(request):
         )[:5]
     )
 
-    result = analyze_patient(
-        symptoms=symptoms.split(","),
-        medical_history=medical_history_text,
-        allergies=allergies,
-        previous_analyses=previous_analyses
-    )
+    try:
+        result = analyze_patient(
+            symptoms=symptoms.split(","),
+            medical_history=medical_history_text,
+            allergies=allergies,
+            previous_analyses=previous_analyses
+        )
+
+    except Exception as error:
+        print(
+            f"AI analysis error: {type(error).__name__}: {error}"
+        )
+
+        return JsonResponse(
+            {
+                "error":
+                    "The AI service is temporarily unavailable. "
+                    "Please try again in a moment."
+            },
+            status=503
+        )
 
     analysis = AIAnalysis.objects.create(
         account=patient,
@@ -483,7 +514,6 @@ def review(request):
         }
     )
 
-    
 
 def history(request):
     if not request.user.is_authenticated:
