@@ -1,54 +1,110 @@
 {% extends "base.html" %}
 
-{% block title %}AI Health Assistant{% endblock %}
+{% block title %}
+    AI Health Assistant
+{% endblock %}
 
 {% block body_header %}
-AI Health Assistant
+    AI Health Assistant
 {% endblock %}
 
 {% block body %}
 
-<div class="panel panel-primary">
+<div class="vc-ai-page">
 
-    <div class="panel-heading">
-        Preliminary Symptom Analysis
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="vc-ai-page-header">
+
+        <div>
+
+            <span class="vc-ai-eyebrow">
+                CLINICAL INTELLIGENCE
+            </span>
+
+            <h2>
+                Preliminary Symptom Analysis
+            </h2>
+
+            <p>
+                AI-assisted decision support for clinical review.
+            </p>
+
+        </div>
+
+
+        <a
+            href="/ai/history/"
+            class="vc-ai-history-link"
+        >
+            <i class="fa fa-history"></i>
+            AI History
+        </a>
+
     </div>
 
-    <div class="panel-body">
 
-        <p>
-            Enter the patient's current symptoms. Gemini will provide an
-            AI-assisted preliminary assessment for doctor review.
-        </p>
+    <!-- =====================================================
+         PATIENT CONTEXT
+         ===================================================== -->
 
+    {% if patient_context %}
 
-        {% if patient_context %}
+        <section class="vc-ai-patient-card">
 
-            <div class="panel panel-default">
+            <div class="vc-ai-patient-main">
 
-                <div class="panel-heading">
-                    Patient Context
+                <div class="vc-ai-patient-avatar">
+
+                    {{ patient_context.name|slice:":1"|upper }}
+
                 </div>
 
-                <div class="panel-body">
 
-                    <p>
-                        <strong>Patient:</strong>
+                <div>
+
+                    <span class="vc-ai-card-eyebrow">
+                        PATIENT
+                    </span>
+
+                    <h3>
                         {{ patient_context.name }}
-                    </p>
+                    </h3>
 
-                    <p>
-                        <strong>Blood Type:</strong>
-                        {{ patient_context.blood_type }}
-                    </p>
-
-                    <p>
-                        <strong>Speciality:</strong>
+                    <span class="vc-ai-patient-speciality">
                         {{ patient_context.speciality }}
-                    </p>
+                    </span>
 
-                    <p>
-                        <strong>Allergies:</strong>
+                </div>
+
+            </div>
+
+
+            <div class="vc-ai-patient-details">
+
+                <div class="vc-ai-context-item">
+
+                    <span>
+                        Blood Type
+                    </span>
+
+                    <strong>
+                        {{ patient_context.blood_type }}
+                    </strong>
+
+                </div>
+
+
+                <div class="vc-ai-context-item">
+
+                    <span>
+                        Allergies
+                    </span>
+
+                    <strong>
 
                         {% if patient_context.allergies %}
                             {{ patient_context.allergies|join:", " }}
@@ -56,32 +112,80 @@ AI Health Assistant
                             None recorded
                         {% endif %}
 
-                    </p>
+                    </strong>
+
+                </div>
 
 
-                    <p>
-                        <strong>Medical History:</strong>
-                    </p>
+                <div class="vc-ai-context-item">
+
+                    <span>
+                        Medical History
+                    </span>
+
+                    <strong>
+
+                        {% if patient_context.medical_history %}
+                            {{ patient_context.medical_history|length }}
+                            recorded item{{ patient_context.medical_history|length|pluralize }}
+
+                        {% else %}
+                            None recorded
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         CLINICAL CONTEXT
+         ===================================================== -->
+
+    {% if patient_context %}
+
+        <section class="vc-ai-context-grid">
+
+
+            <div class="vc-ai-context-panel">
+
+                <div class="vc-ai-context-panel-heading">
+
+                    <span>
+                        <i class="fa fa-heartbeat"></i>
+                        Relevant History
+                    </span>
+
+                </div>
+
+
+                <div class="vc-ai-context-panel-body">
 
                     {% if patient_context.medical_history %}
 
-                        <ul>
+                        {% for item in patient_context.medical_history %}
 
-                            {% for item in patient_context.medical_history %}
+                            <div class="vc-ai-history-item">
 
-                                <li>
-                                    {{ item }}
-                                </li>
+                                <span class="vc-ai-history-dot"></span>
 
-                            {% endfor %}
+                                {{ item }}
 
-                        </ul>
+                            </div>
+
+                        {% endfor %}
 
                     {% else %}
 
-                        <p>
+                        <div class="vc-ai-empty-context">
                             No medical history recorded.
-                        </p>
+                        </div>
 
                     {% endif %}
 
@@ -89,10 +193,94 @@ AI Health Assistant
 
             </div>
 
-        {% endif %}
+
+            <div class="vc-ai-context-panel">
+
+                <div class="vc-ai-context-panel-heading">
+
+                    <span>
+                        <i class="fa fa-clock-o"></i>
+                        Previous AI Assessments
+                    </span>
+
+                </div>
 
 
-        <form method="post" id="ai-form">
+                <div class="vc-ai-context-panel-body">
+
+                    {% if previous_analyses %}
+
+                        {% for item in previous_analyses %}
+
+                            <div class="vc-ai-previous-item">
+
+                                <div>
+
+                                    <strong>
+                                        {{ item.prediction }}
+                                    </strong>
+
+                                    <small>
+                                        {{ item.priority }}
+                                        ·
+                                        {{ item.confidence }}%
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <div class="vc-ai-empty-context">
+                            No previous AI assessments.
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         SYMPTOMS
+         ===================================================== -->
+
+    <section class="vc-ai-workspace-card">
+
+        <div class="vc-ai-section-header">
+
+            <div>
+
+                <span class="vc-ai-card-eyebrow">
+                    CURRENT INPUT
+                </span>
+
+                <h3>
+                    Patient Symptoms
+                </h3>
+
+                <p>
+                    Enter the symptoms you want the AI to assess.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <form
+            method="post"
+            id="ai-form"
+            class="vc-ai-form"
+        >
 
             {% csrf_token %}
 
@@ -104,83 +292,93 @@ AI Health Assistant
             >
 
 
-            <div class="form-group">
-
-                <label for="symptoms">
-                    Symptoms
-                </label>
+            <div class="vc-ai-symptom-box">
 
                 <textarea
                     id="symptoms"
                     name="symptoms"
-                    class="form-control"
-                    rows="5"
+                    rows="4"
                     placeholder="Example: fever, cough, fatigue"
                     required
                 >{% if analysis %}{{ analysis.symptoms }}{% endif %}</textarea>
 
+
+                <div class="vc-ai-symptom-footer">
+
+                    <span>
+                        <i class="fa fa-info-circle"></i>
+                        Separate multiple symptoms with commas.
+                    </span>
+
+
+                    <button
+                        type="submit"
+                        class="vc-ai-analyze-button"
+                        id="analyze-button"
+                    >
+                        <i class="fa fa-magic"></i>
+                        Analyze Symptoms
+                    </button>
+
+                </div>
+
             </div>
-
-
-            <button
-                type="submit"
-                class="btn btn-primary"
-                id="analyze-button"
-            >
-                Analyze Symptoms
-            </button>
 
         </form>
 
-
-        <p style="margin-top:15px;">
-
-            <a
-                href="/ai/history/"
-                class="btn btn-default btn-sm"
-            >
-                AI History
-            </a>
-
-        </p>
+    </section>
 
 
-        {% if user.account.role == 20 and patient_context %}
+    <!-- =====================================================
+         DOCTOR BRIEF
+         ===================================================== -->
 
-            <div
-                class="panel panel-info"
-                style="margin-top:25px;"
-            >
+    {% if user.account.role == 20 and patient_context %}
 
-                <div class="panel-heading">
-                    Doctor Pre-Consultation Brief
+        <section class="vc-ai-brief-card">
+
+            <div class="vc-ai-brief-icon">
+                <i class="fa fa-stethoscope"></i>
+            </div>
+
+
+            <div class="vc-ai-brief-content">
+
+                <span class="vc-ai-card-eyebrow">
+                    DOCTOR BRIEF
+                </span>
+
+                <h3>
+                    Pre-Consultation Brief
+                </h3>
+
+
+                <div class="vc-ai-brief-row">
+
+                    <strong>
+                        Symptoms
+                    </strong>
+
+                    <span id="briefing-symptoms">
+
+                        {% if analysis %}
+                            {{ analysis.symptoms }}
+                        {% else %}
+                            Not analyzed yet
+                        {% endif %}
+
+                    </span>
+
                 </div>
 
-                <div class="panel-body">
 
-                    <p>
-                        <strong>Patient:</strong>
-                        {{ patient_context.name }}
-                    </p>
+                <div class="vc-ai-brief-row">
 
+                    <strong>
+                        Allergies
+                    </strong>
 
-                    <p>
-                        <strong>Current Symptoms:</strong>
-
-                        <span id="briefing-symptoms">
-
-                            {% if analysis %}
-                                {{ analysis.symptoms }}
-                            {% else %}
-                                Not analyzed yet
-                            {% endif %}
-
-                        </span>
-                    </p>
-
-
-                    <p>
-                        <strong>Known Allergies:</strong>
+                    <span>
 
                         {% if patient_context.allergies %}
                             {{ patient_context.allergies|join:", " }}
@@ -188,272 +386,356 @@ AI Health Assistant
                             None recorded
                         {% endif %}
 
-                    </p>
+                    </span>
+
+                </div>
 
 
-                    <p>
-                        <strong>Relevant Medical History:</strong>
-                    </p>
+                <div class="vc-ai-brief-row">
 
+                    <strong>
+                        Relevant History
+                    </strong>
 
-                    {% if patient_context.medical_history %}
+                    <span>
 
-                        <ul>
+                        {% if patient_context.medical_history %}
 
                             {% for item in patient_context.medical_history %}
 
-                                <li>
-                                    {{ item }}
-                                </li>
+                                {{ item }}{% if not forloop.last %}; {% endif %}
 
                             {% endfor %}
 
-                        </ul>
+                        {% else %}
 
-                    {% else %}
-
-                        <p>
-                            No relevant history recorded.
-                        </p>
-
-                    {% endif %}
-
-
-                    {% if previous_analyses %}
-
-                        <p>
-                            <strong>
-                                Previous AI Assessments:
-                            </strong>
-                        </p>
-
-                        <ul>
-
-                            {% for item in previous_analyses %}
-
-                                <li>
-
-                                    <strong>
-                                        {{ item.prediction }}
-                                    </strong>
-
-                                    — {{ item.priority }},
-                                    {{ item.confidence }}%
-
-                                </li>
-
-                            {% endfor %}
-
-                        </ul>
-
-                    {% else %}
-
-                        <p>
-
-                            <strong>
-                                Previous AI Assessments:
-                            </strong>
-
-                            None available.
-
-                        </p>
-
-                    {% endif %}
-
-                </div>
-
-            </div>
-
-        {% endif %}
-
-
-        <div
-            id="ai-result"
-            style="
-                {% if analysis %}
-                    display:block;
-                {% else %}
-                    display:none;
-                {% endif %}
-                margin-top:25px;
-            "
-        >
-
-            <hr>
-
-
-            <h4>
-                AI Preliminary Assessment
-            </h4>
-
-
-            <div class="panel panel-default">
-
-                <div class="panel-heading">
-
-                    <strong>
-                        Possible Conditions
-                    </strong>
-
-                </div>
-
-
-                <div class="panel-body">
-
-                    <ol id="conditions-list">
-
-                        {% if analysis %}
-
-                            {% for condition in analysis.possible_conditions %}
-
-                                <li style="margin-bottom:10px;">
-
-                                    <strong>
-                                        {{ condition.condition }}
-                                    </strong>
-
-                                    <br>
-
-                                    <span>
-                                        {{ condition.reason }}
-                                    </span>
-
-                                </li>
-
-                            {% empty %}
-
-                                <li>
-                                    No additional possible conditions
-                                    available.
-                                </li>
-
-                            {% endfor %}
+                            None recorded
 
                         {% endif %}
 
-                    </ol>
+                    </span>
 
                 </div>
 
             </div>
 
+        </section>
 
-            <p>
+    {% endif %}
 
-                <strong>
-                    Primary Assessment:
-                </strong>
 
-                <span id="prediction">
+    <!-- =====================================================
+         AI RESULT
+         ===================================================== -->
 
-                    {% if analysis %}
-                        {{ analysis.prediction }}
-                    {% endif %}
+    <section
+        id="ai-result"
+        class="vc-ai-result"
+        style="{% if analysis %}display:block;{% else %}display:none;{% endif %}"
+    >
 
+
+        <!-- =================================================
+             RESULT HEADER
+             ================================================= -->
+
+        <div class="vc-ai-result-header">
+
+            <div>
+
+                <span class="vc-ai-eyebrow">
+                    AI ANALYSIS
                 </span>
 
-            </p>
+                <h2>
+                    Preliminary Assessment
+                </h2>
+
+                <p>
+                    Review the AI-generated assessment before
+                    making a clinical decision.
+                </p>
+
+            </div>
 
 
-            <p>
+            <div class="vc-ai-result-status">
 
-                <strong>
-                    Priority:
-                </strong>
+                <span class="vc-ai-status-dot"></span>
 
-                <span id="priority">
-
-                    {% if analysis %}
-                        {{ analysis.priority }}
-                    {% endif %}
-
-                </span>
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Confidence:
-                </strong>
-
-                <span id="confidence">
-
-                    {% if analysis %}
-                        {{ analysis.confidence }}
-                    {% endif %}
-
-                </span>%
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Why?
-                </strong>
-
-                <span id="explanation">
-
-                    {% if analysis %}
-                        {{ analysis.explanation }}
-                    {% endif %}
-
-                </span>
-
-            </p>
-
-
-            <p>
-
-                <strong>
-                    Matched Symptoms:
-                </strong>
-
-                <span id="matched-symptoms">
-
-                    {% if analysis %}
-                        {{ analysis.symptoms }}
-                    {% endif %}
-
-                </span>
-
-            </p>
-
-
-            <div class="alert alert-warning">
-
-                This is an AI-assisted preliminary assessment.
-                It is not a final diagnosis and must be reviewed by a doctor.
+                AI Generated
 
             </div>
 
         </div>
 
 
-        {% if user.account.role == 20 and analysis %}
+        <!-- =================================================
+             RESULT METRICS
+             ================================================= -->
 
-            <hr>
+        <div class="vc-ai-metrics">
 
 
-            <div class="panel panel-success">
+            <div class="vc-ai-metric vc-ai-metric-primary">
 
-                <div class="panel-heading">
-                    Doctor Review
+                <span class="vc-ai-metric-label">
+                    Primary Assessment
+                </span>
+
+                <strong id="prediction">
+
+                    {% if analysis %}
+                        {{ analysis.prediction }}
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+
+            <div class="vc-ai-metric">
+
+                <span class="vc-ai-metric-label">
+                    Priority
+                </span>
+
+                <strong
+                    id="priority"
+                    class="vc-ai-priority-value"
+                >
+
+                    {% if analysis %}
+                        {{ analysis.priority }}
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+
+            <div class="vc-ai-metric">
+
+                <span class="vc-ai-metric-label">
+                    Confidence
+                </span>
+
+                <strong>
+
+                    <span id="confidence">
+
+                        {% if analysis %}
+                            {{ analysis.confidence }}
+                        {% endif %}
+
+                    </span>%
+
+                </strong>
+
+
+                <div class="vc-ai-confidence-bar">
+
+                    <span
+                        id="confidence-bar"
+                        style="width: {% if analysis %}{{ analysis.confidence }}{% else %}0{% endif %}%"
+                    ></span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             POSSIBLE CONDITIONS
+             ================================================= -->
+
+        <div class="vc-ai-analysis-grid">
+
+
+            <div class="vc-ai-analysis-card">
+
+                <div class="vc-ai-analysis-heading">
+
+                    <div class="vc-ai-heading-icon">
+                        <i class="fa fa-list-ol"></i>
+                    </div>
+
+                    <div>
+
+                        <span class="vc-ai-card-eyebrow">
+                            DIFFERENTIAL
+                        </span>
+
+                        <h3>
+                            Possible Conditions
+                        </h3>
+
+                    </div>
+
                 </div>
 
 
-                <div class="panel-body">
+                <ol
+                    id="conditions-list"
+                    class="vc-ai-condition-list"
+                >
 
-                    <p>
+                    {% if analysis %}
 
-                        <strong>
-                            Current Review Status:
-                        </strong>
+                        {% for condition in analysis.possible_conditions %}
 
-                        <span id="review-status-label">
+                            <li>
+
+                                <div class="vc-ai-condition-number">
+                                    {{ forloop.counter }}
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        {{ condition.condition }}
+                                    </strong>
+
+                                    <p>
+                                        {{ condition.reason }}
+                                    </p>
+
+                                </div>
+
+                            </li>
+
+                        {% empty %}
+
+                            <li class="vc-ai-condition-empty">
+                                No additional conditions available.
+                            </li>
+
+                        {% endfor %}
+
+                    {% endif %}
+
+                </ol>
+
+            </div>
+
+
+            <!-- =============================================
+                 WHY
+                 ============================================= -->
+
+            <div class="vc-ai-analysis-card vc-ai-explanation-card">
+
+                <div class="vc-ai-analysis-heading">
+
+                    <div class="vc-ai-heading-icon">
+                        <i class="fa fa-lightbulb-o"></i>
+                    </div>
+
+                    <div>
+
+                        <span class="vc-ai-card-eyebrow">
+                            CLINICAL REASONING
+                        </span>
+
+                        <h3>
+                            Why this assessment?
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="explanation"
+                    class="vc-ai-explanation"
+                >
+
+                    {% if analysis %}
+                        {{ analysis.explanation }}
+                    {% endif %}
+
+                </div>
+
+
+                <div class="vc-ai-matched">
+
+                    <span>
+                        Matched symptoms
+                    </span>
+
+                    <div id="matched-symptoms">
+
+                        {% if analysis %}
+                            {{ analysis.symptoms }}
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SAFETY NOTICE
+             ================================================= -->
+
+        <div class="vc-ai-safety">
+
+            <i class="fa fa-shield"></i>
+
+            <div>
+
+                <strong>
+                    Clinical decision support only
+                </strong>
+
+                <span>
+                    This is an AI-assisted preliminary assessment.
+                    It is not a final diagnosis and must be reviewed
+                    by a doctor.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             DOCTOR REVIEW
+             ================================================= -->
+
+        {% if user.account.role == 20 %}
+
+            <section class="vc-ai-review-card">
+
+                <div class="vc-ai-review-header">
+
+                    <div>
+
+                        <span class="vc-ai-eyebrow">
+                            CLINICAL OVERSIGHT
+                        </span>
+
+                        <h3>
+                            Doctor Review
+                        </h3>
+
+                    </div>
+
+
+                    <div
+                        class="vc-ai-review-status pending"
+                        id="review-status-label"
+                    >
+
+                        {% if analysis %}
 
                             {% if analysis.doctor_review == "PENDING" %}
                                 Pending
@@ -471,73 +753,85 @@ AI Health Assistant
                                 {{ analysis.doctor_review }}
                             {% endif %}
 
-                        </span>
+                        {% else %}
 
-                    </p>
+                            Pending
 
+                        {% endif %}
 
-                    {% if analysis.reviewed_at %}
+                    </div>
 
-                        <p>
-
-                            <strong>
-                                Reviewed At:
-                            </strong>
-
-                            {{ analysis.reviewed_at }}
-
-                        </p>
-
-                    {% endif %}
+                </div>
 
 
-                    <div class="form-group">
+                {% if analysis and analysis.reviewed_at %}
 
-                        <label for="doctor-review">
+                    <div class="vc-ai-reviewed-meta">
+
+                        <i class="fa fa-clock-o"></i>
+
+                        Reviewed
+                        {{ analysis.reviewed_at }}
+
+                    </div>
+
+                {% endif %}
+
+
+                <div class="vc-ai-review-body">
+
+
+                    <div class="vc-ai-review-decision">
+
+                        <label>
                             AI Assessment Decision
                         </label>
 
 
-                        <select
+                        <div class="vc-ai-decision-options">
+
+                            <button
+                                type="button"
+                                class="vc-ai-decision-button accepted"
+                                data-value="ACCEPTED"
+                            >
+                                <i class="fa fa-check"></i>
+                                Accept
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="vc-ai-decision-button modified"
+                                data-value="MODIFIED"
+                            >
+                                <i class="fa fa-pencil"></i>
+                                Modify
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="vc-ai-decision-button rejected"
+                                data-value="REJECTED"
+                            >
+                                <i class="fa fa-times"></i>
+                                Reject
+                            </button>
+
+                        </div>
+
+
+                        <input
+                            type="hidden"
                             id="doctor-review"
-                            class="form-control"
+                            value="{% if analysis %}{{ analysis.doctor_review }}{% endif %}"
                         >
-
-                            <option
-                                value="ACCEPTED"
-                                {% if analysis.doctor_review == "ACCEPTED" %}
-                                    selected
-                                {% endif %}
-                            >
-                                Accept AI Assessment
-                            </option>
-
-
-                            <option
-                                value="MODIFIED"
-                                {% if analysis.doctor_review == "MODIFIED" %}
-                                    selected
-                                {% endif %}
-                            >
-                                Modify AI Assessment
-                            </option>
-
-
-                            <option
-                                value="REJECTED"
-                                {% if analysis.doctor_review == "REJECTED" %}
-                                    selected
-                                {% endif %}
-                            >
-                                Reject AI Assessment
-                            </option>
-
-                        </select>
 
                     </div>
 
 
-                    <div class="form-group">
+                    <div class="vc-ai-final-diagnosis">
 
                         <label for="final-diagnosis">
                             Final Diagnosis
@@ -546,239 +840,125 @@ AI Health Assistant
 
                         <textarea
                             id="final-diagnosis"
-                            class="form-control"
                             rows="4"
                             placeholder="Enter the doctor's final diagnosis"
-                        >{{ analysis.final_diagnosis }}</textarea>
+                        >{% if analysis %}{{ analysis.final_diagnosis }}{% endif %}</textarea>
 
                     </div>
 
 
-                    <button
-                        type="button"
-                        class="btn btn-success"
-                        id="review-button"
-                    >
-                        Save Doctor Review
-                    </button>
+                    <div class="vc-ai-review-footer">
+
+                        <span
+                            id="review-status"
+                            class="vc-ai-save-status"
+                        ></span>
 
 
-                    <span
-                        id="review-status"
-                        style="margin-left:10px;"
-                    ></span>
+                        <button
+                            type="button"
+                            class="vc-ai-save-button"
+                            id="review-button"
+                        >
+                            <i class="fa fa-save"></i>
+                            Save Doctor Review
+                        </button>
+
+                    </div>
 
                 </div>
 
-            </div>
+            </section>
+
+        {% endif %}
 
 
-            <script>
+    </section>
 
-                document
-                    .getElementById("review-button")
-                    .addEventListener(
+
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+     ========================================================= -->
+
+{% if user.account.role == 20 and analysis %}
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        const currentReview =
+            document.getElementById(
+                "doctor-review"
+            ).value;
+
+
+        document
+            .querySelectorAll(
+                ".vc-ai-decision-button"
+            )
+            .forEach(
+                function(button) {
+
+                    if (
+                        button.dataset.value ===
+                        currentReview
+                    ) {
+
+                        button.classList.add(
+                            "selected"
+                        );
+
+                    }
+
+
+                    button.addEventListener(
                         "click",
                         function() {
 
-                            const appointmentId =
-                                document
-                                    .getElementById(
-                                        "appointment_id"
-                                    )
-                                    .value;
+                            document
+                                .querySelectorAll(
+                                    ".vc-ai-decision-button"
+                                )
+                                .forEach(
+                                    function(item) {
 
-
-                            const doctorReview =
-                                document
-                                    .getElementById(
-                                        "doctor-review"
-                                    )
-                                    .value;
-
-
-                            const finalDiagnosis =
-                                document
-                                    .getElementById(
-                                        "final-diagnosis"
-                                    )
-                                    .value;
-
-
-                            const button =
-                                document
-                                    .getElementById(
-                                        "review-button"
-                                    );
-
-
-                            const status =
-                                document
-                                    .getElementById(
-                                        "review-status"
-                                    );
-
-
-                            const statusLabel =
-                                document
-                                    .getElementById(
-                                        "review-status-label"
-                                    );
-
-
-                            button.disabled = true;
-
-                            button.textContent =
-                                "Saving...";
-
-
-                            fetch(
-                                "/ai/review/",
-                                {
-                                    method: "POST",
-
-                                    headers: {
-                                        "Content-Type":
-                                            "application/x-www-form-urlencoded"
-                                    },
-
-                                    body:
-                                        "appointment_id=" +
-                                        encodeURIComponent(
-                                            appointmentId
-                                        ) +
-
-                                        "&doctor_review=" +
-                                        encodeURIComponent(
-                                            doctorReview
-                                        ) +
-
-                                        "&final_diagnosis=" +
-                                        encodeURIComponent(
-                                            finalDiagnosis
-                                        )
-                                }
-                            )
-
-                            .then(
-                                response => {
-
-                                    return response.json()
-                                        .then(
-                                            data => {
-
-                                                if (
-                                                    !response.ok
-                                                ) {
-
-                                                    throw new Error(
-                                                        data.error ||
-                                                        "Unable to save review."
-                                                    );
-
-                                                }
-
-                                                return data;
-
-                                            }
-                                        );
-
-                                }
-                            )
-
-                            .then(
-                                data => {
-
-                                    if (!data.success) {
-
-                                        throw new Error(
-                                            data.error ||
-                                            "Unable to save review."
+                                        item.classList.remove(
+                                            "selected"
                                         );
 
                                     }
+                                );
 
 
-                                    let readableStatus =
-                                        "Pending";
-
-
-                                    if (
-                                        data.doctor_review ===
-                                        "ACCEPTED"
-                                    ) {
-
-                                        readableStatus =
-                                            "Accepted";
-
-                                    }
-                                    else if (
-                                        data.doctor_review ===
-                                        "MODIFIED"
-                                    ) {
-
-                                        readableStatus =
-                                            "Modified";
-
-                                    }
-                                    else if (
-                                        data.doctor_review ===
-                                        "REJECTED"
-                                    ) {
-
-                                        readableStatus =
-                                            "Rejected";
-
-                                    }
-
-
-                                    statusLabel.textContent =
-                                        readableStatus;
-
-
-                                    status.textContent =
-                                        "Doctor review saved successfully.";
-
-
-                                    status.style.color =
-                                        "green";
-
-                                }
-                            )
-
-                            .catch(
-                                error => {
-
-                                    status.textContent =
-                                        error.message;
-
-                                    status.style.color =
-                                        "red";
-
-                                }
-                            )
-
-                            .finally(
-                                () => {
-
-                                    button.disabled = false;
-
-                                    button.textContent =
-                                        "Save Doctor Review";
-
-                                }
+                            button.classList.add(
+                                "selected"
                             );
+
+
+                            document
+                                .getElementById(
+                                    "doctor-review"
+                                )
+                                .value =
+                                button.dataset.value;
 
                         }
                     );
 
-            </script>
+                }
+            );
 
-        {% endif %}
+    }
+);
 
-    </div>
+</script>
 
-</div>
+{% endif %}
 
 
 <script>
@@ -817,8 +997,8 @@ document
 
             button.disabled = true;
 
-            button.textContent =
-                "Analyzing...";
+            button.innerHTML =
+                '<i class="fa fa-spinner fa-spin"></i> Analyzing...';
 
 
             fetch(
@@ -903,6 +1083,14 @@ document
 
                     document
                         .getElementById(
+                            "confidence-bar"
+                        )
+                        .style.width =
+                        data.confidence + "%";
+
+
+                    document
+                        .getElementById(
                             "explanation"
                         )
                         .textContent =
@@ -949,12 +1137,16 @@ document
 
                     if (
                         data.possible_conditions &&
-                        data.possible_conditions.length > 0
+                        data.possible_conditions.length
+                        > 0
                     ) {
 
                         data.possible_conditions
                             .forEach(
-                                function(condition) {
+                                function(
+                                    condition,
+                                    index
+                                ) {
 
                                     const item =
                                         document
@@ -963,8 +1155,24 @@ document
                                             );
 
 
-                                    item.style.marginBottom =
-                                        "10px";
+                                    const number =
+                                        document
+                                            .createElement(
+                                                "div"
+                                            );
+
+                                    number.className =
+                                        "vc-ai-condition-number";
+
+                                    number.textContent =
+                                        index + 1;
+
+
+                                    const content =
+                                        document
+                                            .createElement(
+                                                "div"
+                                            );
 
 
                                     const title =
@@ -973,7 +1181,6 @@ document
                                                 "strong"
                                             );
 
-
                                     title.textContent =
                                         condition.condition;
 
@@ -981,29 +1188,28 @@ document
                                     const reason =
                                         document
                                             .createElement(
-                                                "span"
+                                                "p"
                                             );
-
 
                                     reason.textContent =
                                         condition.reason;
 
 
-                                    item.appendChild(
+                                    content.appendChild(
                                         title
                                     );
 
-
-                                    item.appendChild(
-                                        document
-                                            .createElement(
-                                                "br"
-                                            )
+                                    content.appendChild(
+                                        reason
                                     );
 
 
                                     item.appendChild(
-                                        reason
+                                        number
+                                    );
+
+                                    item.appendChild(
+                                        content
                                     );
 
 
@@ -1024,6 +1230,8 @@ document
                                     "li"
                                 );
 
+                        item.className =
+                            "vc-ai-condition-empty";
 
                         item.textContent =
                             "No possible conditions returned.";
@@ -1043,6 +1251,16 @@ document
                         )
                         .style.display =
                         "block";
+
+
+                    document
+                        .getElementById(
+                            "ai-result"
+                        )
+                        .scrollIntoView({
+                            behavior: "smooth",
+                            block: "start"
+                        });
 
                 }
             )
@@ -1104,8 +1322,8 @@ document
 
                     button.disabled = false;
 
-                    button.textContent =
-                        "Analyze Symptoms";
+                    button.innerHTML =
+                        '<i class="fa fa-magic"></i> Analyze Symptoms';
 
                 }
             );
@@ -1114,5 +1332,221 @@ document
     );
 
 </script>
+
+
+{% if user.account.role == 20 and analysis %}
+
+<script>
+
+document
+    .getElementById(
+        "review-button"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            const appointmentId =
+                document
+                    .getElementById(
+                        "appointment_id"
+                    )
+                    .value;
+
+
+            const doctorReview =
+                document
+                    .getElementById(
+                        "doctor-review"
+                    )
+                    .value;
+
+
+            const finalDiagnosis =
+                document
+                    .getElementById(
+                        "final-diagnosis"
+                    )
+                    .value;
+
+
+            const button =
+                document
+                    .getElementById(
+                        "review-button"
+                    );
+
+
+            const status =
+                document
+                    .getElementById(
+                        "review-status"
+                    );
+
+
+            const statusLabel =
+                document
+                    .getElementById(
+                        "review-status-label"
+                    );
+
+
+            if (!doctorReview) {
+
+                status.textContent =
+                    "Please select a review decision.";
+
+                status.className =
+                    "vc-ai-save-status error";
+
+                return;
+
+            }
+
+
+            button.disabled = true;
+
+            button.innerHTML =
+                '<i class="fa fa-spinner fa-spin"></i> Saving...';
+
+
+            fetch(
+                "/ai/review/",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/x-www-form-urlencoded"
+                    },
+
+                    body:
+                        "appointment_id=" +
+                        encodeURIComponent(
+                            appointmentId
+                        ) +
+
+                        "&doctor_review=" +
+                        encodeURIComponent(
+                            doctorReview
+                        ) +
+
+                        "&final_diagnosis=" +
+                        encodeURIComponent(
+                            finalDiagnosis
+                        )
+                }
+            )
+
+            .then(
+                response => {
+
+                    return response.json()
+                        .then(
+                            data => {
+
+                                if (!response.ok) {
+
+                                    throw new Error(
+                                        data.error ||
+                                        "Unable to save review."
+                                    );
+
+                                }
+
+                                return data;
+
+                            }
+                        );
+
+                }
+            )
+
+            .then(
+                data => {
+
+                    let readableStatus =
+                        "Pending";
+
+
+                    if (
+                        data.doctor_review ===
+                        "ACCEPTED"
+                    ) {
+
+                        readableStatus =
+                            "Accepted";
+
+                    }
+                    else if (
+                        data.doctor_review ===
+                        "MODIFIED"
+                    ) {
+
+                        readableStatus =
+                            "Modified";
+
+                    }
+                    else if (
+                        data.doctor_review ===
+                        "REJECTED"
+                    ) {
+
+                        readableStatus =
+                            "Rejected";
+
+                    }
+
+
+                    statusLabel.textContent =
+                        readableStatus;
+
+
+                    statusLabel.className =
+                        "vc-ai-review-status " +
+                        data.doctor_review
+                            .toLowerCase();
+
+
+                    status.textContent =
+                        "Doctor review saved successfully.";
+
+
+                    status.className =
+                        "vc-ai-save-status success";
+
+                }
+            )
+
+            .catch(
+                error => {
+
+                    status.textContent =
+                        error.message;
+
+
+                    status.className =
+                        "vc-ai-save-status error";
+
+                }
+            )
+
+            .finally(
+                () => {
+
+                    button.disabled = false;
+
+                    button.innerHTML =
+                        '<i class="fa fa-save"></i> Save Doctor Review';
+
+                }
+            );
+
+        }
+    );
+
+</script>
+
+{% endif %}
 
 {% endblock %}

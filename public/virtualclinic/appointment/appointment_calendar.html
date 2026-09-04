@@ -1,61 +1,268 @@
 {% load app_filters %}
-<div id='appointment-calendar'></div>
+
+<div class="vc-calendar">
+
+    <div
+        id="appointment-calendar"
+        class="vc-fullcalendar"
+    ></div>
+
+</div>
+
 {% include "virtualclinic/appointment/appointment_modal.html" %}
+
+
 <script type="text/javascript">
-    var healthnet = {};
-    function displayDeleteConfirmation(){
-        var startTime = moment(healthnet.lastevent.startTime).format("MMMM Do h:mm a");
-        document.getElementById('confirm-modal-body').innerHTML = 'Are you sure you want to cancel your appointment on '.concat(startTime, ' at ', virtualclinic.lastevent.hospital, '?');
-        document.getElementById('confirm-modal-hidden').value = healthnet.lastevent.id;
-        $('#confirm-modal').modal()
-        $('#options-modal').modal('hide')
+
+    var virtualClinicCalendar = {};
+
+
+    function displayDeleteConfirmation() {
+
+        var event = virtualClinicCalendar.lastEvent;
+
+        if (!event) {
+            return;
+        }
+
+
+        var startTime = moment(
+            event.startTime
+        ).format(
+            "MMMM Do h:mm a"
+        );
+
+
+        document.getElementById(
+            "confirm-modal-body"
+        ).innerHTML =
+            "Are you sure you want to cancel your appointment on "
+            .concat(
+                startTime,
+                " at ",
+                event.hospital,
+                "?"
+            );
+
+
+        document.getElementById(
+            "confirm-modal-hidden"
+        ).value =
+            event.id;
+
+
+        $("#confirm-modal").modal();
+
+
+        $("#options-modal").modal(
+            "hide"
+        );
+
     }
-    function displayAppointmentManagement(){
-        var startTime = moment(virtualclinic.lastevent.startTime).format("MMMM Do h:mm a");
-        document.getElementById('options-modal-body').innerHTML =
-                'Showing options for your appointment on '.concat(
-                        virtualclinic.lastevent.formatted_start,
-                        ' until ',
-                        virtualclinic.lastevent.formatted_end,
-                        ' at ',
-                        virtualclinic.lastevent.hospital,
-                        '...');
-        document.getElementById('options-modal-link-update').href = '/appointment/update/?pk='.concat(healthnet.lastevent.id);
-        document.getElementById('options-modal-link-delete').onclick = displayDeleteConfirmation;
-        $('#options-modal').modal()
+
+
+    function displayAppointmentManagement() {
+
+        var event =
+            virtualClinicCalendar.lastEvent;
+
+
+        if (!event) {
+            return;
+        }
+
+
+        document.getElementById(
+            "options-modal-body"
+        ).innerHTML =
+            "Showing options for your appointment on "
+            .concat(
+                event.formatted_start,
+                " until ",
+                event.formatted_end,
+                " at ",
+                event.hospital,
+                "..."
+            );
+
+
+        document.getElementById(
+            "options-modal-link-update"
+        ).href =
+            "/appointment/update/?pk="
+            .concat(
+                event.id
+            );
+
+
+        document.getElementById(
+            "options-modal-link-delete"
+        ).onclick =
+            displayDeleteConfirmation;
+
+
+        $("#options-modal").modal();
+
     }
-    $(function () {
-        $('#appointment-calendar').fullCalendar({
+
+
+    $(function() {
+
+        $("#appointment-calendar").fullCalendar({
+
             header: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'month,agendaWeek,agendaDay'
+                left: "prev,next today",
+                center: "title",
+                right: "month,agendaWeek,agendaDay"
             },
-            aspectRatio: 2.25,
+
+
+            defaultView: "agendaWeek",
+
+            scrollTime: "08:00:00",
+
+            minTime: "08:00:00",
+
+            maxTime: "21:00:00",
+
+            slotDuration: "00:30:00",
+
+            slotLabelInterval: "01:00:00",
+
+            allDaySlot: true,
+
+            nowIndicator: true,
+
+            eventLimit: true,
+
+            aspectRatio: 1.45,
+
+
+            height: "520",
+
+
+            contentHeight: "auto",
+
+
             editable: false,
-            eventClick: function(event, jsEvent, view) {
-                virtualclinic.lastevent = event;
-                displayAppointmentManagement(event.id, event.startTime, event.hospital);
-            },
-            eventMouseover: function(calEvent, jsEvent, view) {
-                $(this).css('background-color', '#1A242F');
-            },
-            eventMouseout: function(calEvent, jsEvent, view) {
-                $(this).css('background-color', '#2c3e50');
-            },
-            eventBackgroundColor: "#2c3e50",
-            eventBorderColor: "#1A242F",
-            eventColor: "#1A242F",
-            dayClick: function(date, jsEvent, view) {
-                if(view.name == 'month') {
-                    calendar = $('#appointment-calendar');
-                    calendar.fullCalendar('changeView', 'agendaDay');
-                    calendar.fullCalendar('gotoDate', date);
-                }
-            },
+
+
+            eventClick:
+                function(
+                    event,
+                    jsEvent,
+                    view
+                ) {
+
+                    virtualClinicCalendar.lastEvent =
+                        event;
+
+                    displayAppointmentManagement();
+
+                },
+
+
+            eventMouseover:
+                function(
+                    calEvent,
+                    jsEvent,
+                    view
+                ) {
+
+                    $(this).addClass(
+                        "vc-calendar-event-hover"
+                    );
+
+                },
+
+
+            eventMouseout:
+                function(
+                    calEvent,
+                    jsEvent,
+                    view
+                ) {
+
+                    $(this).removeClass(
+                        "vc-calendar-event-hover"
+                    );
+
+                },
+
+
+            dayClick:
+                function(
+                    date,
+                    jsEvent,
+                    view
+                ) {
+
+                    var calendar =
+                        $("#appointment-calendar");
+
+
+                    if (
+                        view.name === "month"
+                    ) {
+
+                        calendar.fullCalendar(
+                            "changeView",
+                            "agendaDay"
+                        );
+
+
+                        calendar.fullCalendar(
+                            "gotoDate",
+                            date
+                        );
+
+                    }
+
+                },
+
+                eventRender:
+                    function(
+                        event,
+                        element
+                    ) {
+
+                        element.attr(
+                            "title",
+                            event.hospital
+                                ? event.hospital
+                                : "Appointment"
+                        );
+
+
+                        element.find(
+                            ".fc-title"
+                        ).each(
+                            function() {
+
+                                $(this).prepend(
+                                    '<i class="fa fa-calendar-check-o"></i> '
+                                );
+
+                            }
+                        );
+
+
+                        element.find(
+                            ".fc-time"
+                        ).css(
+                            "font-weight",
+                            "700"
+                        );
+
+                    },
+
+
             events: [
                 {{ events }}
             ]
-        })
+
+        });
+
     });
+
 </script>

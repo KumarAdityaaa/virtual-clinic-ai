@@ -1,83 +1,605 @@
 {% extends "base.html" %}
+
 {% load app_filters %}
+
+
 {% block title %}
-    View Prescriptions
+    Prescriptions
 {% endblock %}
+
+
 {% block sidebar_prescription %}
     active
 {% endblock %}
+
+
 {% block body_header %}
-    View Prescriptions
-    {% if user.account.role == 20 %}
-        <br>
-        <a class="btn btn-success btn-sm" href="/prescription/create/" role="button">Add Prescription</a>
-    {% endif %}
+    Prescriptions
 {% endblock %}
+
+
+{% block page_actions %}
+
+    {% if user.account.role == 20 %}
+
+        <a
+            href="/prescription/create/"
+            class="btn btn-primary"
+        >
+            <i class="fa fa-plus"></i>
+            Add Prescription
+        </a>
+
+    {% endif %}
+
+{% endblock %}
+
+
 {% block body %}
-    <table id="datatable" class="table table-hover table-striped table-bordered">
-        <thead>
-            <th>Doctor</th>
-            <th>Patient</th>
-            <th>Medication</th>
-            <th>Strength</th>
-            <th>Date</th>
-            <th>Number of Refill(s)</th>
-            <th>Status</th>
-            <th data-defaultsort='disabled'>Options</th>
-            <th>Invoice</th>
-        </thead>
-        <tbody>
-            {% for prescription in query %}
-                <tr>
-                    <td>{{ prescription.doctor.profile }}</td>
-                    <td>{{ prescription.patient.profile }}</td>
-                    <td>{{ prescription.medication }}</td>
-                    <td>{{ prescription.strength }}</td>
-                    <td data-value="{{ prescription.date | date:'U' }}">{{ prescription.date }}</td>
-                    <td>{{ prescription.refill }}</td>
-                    <td>{% if prescription.active %}Active{% else %}Delivered{% endif %}</td>
-                    <td>
-                        {% if prescription.active %}
-                            {% if user.account.role == 20 %}
-                                <script type="text/javascript">
-                                    function proxy{{ prescription.pk }}() {
-                                        configureModal({% autoescape on %}
-                                            '{{ prescription.pk }}'
-                                            '{{ prescription.medication }}',
-                                            '{{ prescription.patient.profile }}'
-                                        {% endautoescape %});
-                                    }
-                                </script>
-                                <button onclick="proxy{{ prescription.pk }}()" type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#form-modal">Delete</button>
-                                <a class="btn btn-warning btn-sm" href="/prescription/update/?pk={{ prescription.pk }}" role="button">Update</a>
-                            {% endif %}
-                            {% if user.account.role == 50 %}
-                                <a class="btn btn-warning btn-sm" href="/prescription/update/?pk={{ prescription.pk }}" role="button">Update</a>
-                            {% endif %}
-                        {% endif %}
-                    </td>
-                    <td><a class="btn btn-info btn-sm" href="/pdf/?pk={{ prescription.pk }}" role="button">Generate Invoice</a></td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% include "form_modal.html" %}
-    <script type="text/javascript">
-        function configureModal(pk, medication, person){
-            document.getElementById('form-modal-title').innerHTML = 'Delete confirmation';
-            document.getElementById('form-modal-body').innerHTML = 'Are you sure you want to delete your prescription of '.concat(medication, ' for ', person, '?');
-            document.getElementById('form-modal-hidden').value = pk;
-            document.getElementById('form-modal-submit').value = 'Delete';
-            document.getElementById('form-modal-submit').name = 'delete';
-        }
-        $(document).ready(function () {
-           $('#datatable').DataTable({
-              "order":[[4,"desc"]],
-               "columnDefs":[
-                   {"orderable":false,"targets":4},
-                   {"searchable":false,"targets":2}
-               ]
-           });
-        });
-    </script>
+
+<div class="vc-prescriptions-page">
+
+
+    <!-- =====================================================
+         INTRO
+         ===================================================== -->
+
+    <div class="vc-prescription-intro">
+
+        <div>
+
+            <span class="vc-ai-eyebrow">
+                CLINICAL MEDICATION
+            </span>
+
+            <h2>
+                Prescription Management
+            </h2>
+
+            <p>
+                View medication instructions, refill information,
+                prescription status and downloadable invoices.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY
+         ===================================================== -->
+
+    <div class="vc-prescription-summary">
+
+
+        <div class="vc-prescription-summary-card">
+
+            <div class="vc-prescription-summary-icon blue">
+                <i class="fa fa-file-text"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    PRESCRIPTIONS
+                </span>
+
+                <strong>
+                    {{ query|length }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="vc-prescription-summary-card">
+
+            <div class="vc-prescription-summary-icon green">
+                <i class="fa fa-check-circle"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    MEDICATION RECORDS
+                </span>
+
+                <strong>
+                    Available
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="vc-prescription-summary-card">
+
+            <div class="vc-prescription-summary-icon purple">
+                <i class="fa fa-file-pdf-o"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    DOCUMENTS
+                </span>
+
+                <strong>
+                    Invoice generation
+                </strong>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         PRESCRIPTION CARD
+         ===================================================== -->
+
+    <section class="vc-prescriptions-card">
+
+
+        <div class="vc-prescriptions-card-header">
+
+            <div>
+
+                <span class="vc-panel-eyebrow">
+                    MEDICATION RECORDS
+                </span>
+
+                <h3>
+                    Prescription List
+                </h3>
+
+            </div>
+
+
+            <div class="vc-prescription-secure-note">
+
+                <i class="fa fa-shield"></i>
+
+                Clinical information
+
+            </div>
+
+        </div>
+
+
+        <div class="vc-prescriptions-table-wrap">
+
+            <table
+                id="datatable"
+                class="table vc-prescriptions-table"
+            >
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Doctor
+                        </th>
+
+                        <th>
+                            Patient
+                        </th>
+
+                        <th>
+                            Medication
+                        </th>
+
+                        <th>
+                            Strength
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Refills
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Options
+                        </th>
+
+                        <th>
+                            Invoice
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for prescription in query %}
+
+                        <tr>
+
+
+                            <!-- Doctor -->
+
+                            <td>
+
+                                <div class="vc-prescription-person">
+
+                                    <div class="vc-prescription-avatar doctor">
+                                        {{ prescription.doctor.profile.firstname|slice:":1"|upper }}
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            {{ prescription.doctor.profile }}
+                                        </strong>
+
+                                        <span>
+                                            Prescribing doctor
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Patient -->
+
+                            <td>
+
+                                <div class="vc-prescription-person">
+
+                                    <div class="vc-prescription-avatar patient">
+                                        {{ prescription.patient.profile.firstname|slice:":1"|upper }}
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            {{ prescription.patient.profile }}
+                                        </strong>
+
+                                        <span>
+                                            Patient
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Medication -->
+
+                            <td>
+
+                                <div class="vc-medication-cell">
+
+                                    <div class="vc-medication-icon">
+                                        <i class="fa fa-medkit"></i>
+                                    </div>
+
+                                    <strong>
+                                        {{ prescription.medication }}
+                                    </strong>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Strength -->
+
+                            <td>
+
+                                {% if prescription.strength %}
+
+                                    <span class="vc-strength-badge">
+                                        {{ prescription.strength }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="vc-prescription-muted">
+                                        Not specified
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Date -->
+
+                            <td
+                                data-value="{{ prescription.date|date:'U' }}"
+                            >
+
+                                <div class="vc-prescription-date">
+
+                                    <strong>
+                                        {{ prescription.date|date:"M d, Y" }}
+                                    </strong>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Refills -->
+
+                            <td>
+
+                                <div class="vc-refill-count">
+
+                                    <strong>
+                                        {{ prescription.refill }}
+                                    </strong>
+
+                                    <span>
+                                        refill{{ prescription.refill|pluralize }}
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Status -->
+
+                            <td>
+
+                                {% if prescription.active %}
+
+                                    <span class="vc-prescription-status active">
+
+                                        <span></span>
+
+                                        Active
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="vc-prescription-status delivered">
+
+                                        <span></span>
+
+                                        Delivered
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Options -->
+
+                            <td>
+
+                                <div class="vc-prescription-actions">
+
+                                    {% if prescription.active %}
+
+
+                                        {% if user.account.role == 20 %}
+
+
+                                            <script type="text/javascript">
+
+                                                function proxy{{ prescription.pk }}() {
+
+                                                    configureModal(
+                                                        '{{ prescription.pk }}',
+                                                        '{{ prescription.medication|sanitizeJS }}',
+                                                        '{{ prescription.patient.profile|sanitizeJS }}'
+                                                    );
+
+                                                }
+
+                                            </script>
+
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-danger btn-sm"
+                                                onclick="proxy{{ prescription.pk }}()"
+                                                data-toggle="modal"
+                                                data-target="#form-modal"
+                                                title="Delete prescription"
+                                            >
+
+                                                <i class="fa fa-trash"></i>
+
+                                                Delete
+
+                                            </button>
+
+
+                                            <a
+                                                class="btn btn-warning btn-sm"
+                                                href="/prescription/update/?pk={{ prescription.pk }}"
+                                            >
+
+                                                <i class="fa fa-pencil"></i>
+
+                                                Update
+
+                                            </a>
+
+
+                                        {% elif user.account.role == 50 %}
+
+
+                                            <a
+                                                class="btn btn-warning btn-sm"
+                                                href="/prescription/update/?pk={{ prescription.pk }}"
+                                            >
+
+                                                <i class="fa fa-pencil"></i>
+
+                                                Update
+
+                                            </a>
+
+
+                                        {% endif %}
+
+
+                                    {% else %}
+
+                                        <span class="vc-prescription-muted">
+                                            No actions
+                                        </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Invoice -->
+
+                            <td>
+
+                                <a
+                                    class="vc-invoice-button"
+                                    href="/pdf/?pk={{ prescription.pk }}"
+                                    title="Generate prescription invoice"
+                                >
+
+                                    <i class="fa fa-file-pdf-o"></i>
+
+                                    Generate Invoice
+
+                                </a>
+
+                            </td>
+
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+</div>
+
+
+{% include "form_modal.html" %}
+
+
+<script type="text/javascript">
+
+
+function configureModal(
+    pk,
+    medication,
+    person
+) {
+
+    document.getElementById(
+        "form-modal-title"
+    ).innerHTML =
+        "Delete confirmation";
+
+
+    document.getElementById(
+        "form-modal-body"
+    ).innerHTML =
+        "Are you sure you want to delete your prescription of "
+        .concat(
+            medication,
+            " for ",
+            person,
+            "?"
+        );
+
+
+    document.getElementById(
+        "form-modal-hidden"
+    ).value =
+        pk;
+
+
+    document.getElementById(
+        "form-modal-submit"
+    ).value =
+        "Delete";
+
+
+    document.getElementById(
+        "form-modal-submit"
+    ).name =
+        "delete";
+
+}
+
+
+$(document).ready(function() {
+
+    $("#datatable").DataTable({
+
+        pageLength: 10,
+
+        lengthMenu: [
+            [10, 25, 50, 100],
+            [10, 25, 50, 100]
+        ],
+
+        order: [
+            [4, "desc"]
+        ],
+
+        columnDefs: [
+
+            {
+                orderable: false,
+                targets: 4
+            },
+
+            {
+                searchable: false,
+                targets: 2
+            },
+
+            {
+                orderable: false,
+                targets: [7, 8]
+            }
+
+        ]
+
+    });
+
+});
+
+</script>
+
+
 {% endblock %}

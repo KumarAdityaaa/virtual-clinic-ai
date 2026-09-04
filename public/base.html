@@ -1,130 +1,1473 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 {% load app_filters %}
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
 
-    <title>Virtual Clinic {% block title %}{% endblock %}</title>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.2/flatly/bootstrap.css"/>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css"/>
-    <link rel="stylesheet" type="text/css" href="/static/css/dashboard.css"/>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css"/>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.8.2/fullcalendar.min.css"/>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
 
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.8.2/fullcalendar.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+    <title>
+        VirtualClinic {% block title %}{% endblock %}
+    </title>
+
+
+    <!-- Bootstrap -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.2/flatly/bootstrap.css"
+    >
+
+    <!-- Existing plugins -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.8.2/fullcalendar.min.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"
+    >
+
+
+    <!-- VirtualClinic design system -->
+    <link
+        rel="stylesheet"
+        href="/static/css/virtualclinic.css"
+    >
+
+
+    <!-- Existing JavaScript -->
+    <script
+        src="https://code.jquery.com/jquery-3.3.1.min.js">
+    </script>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js">
+    </script>
+
+    <script
+        src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
+    </script>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js">
+    </script>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.8.2/fullcalendar.min.js">
+    </script>
+
+    <script
+        src="https://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js">
+    </script>
+
+    <script
+        src="https://cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.js">
+    </script>
+
 </head>
+
+
 <body>
-    <nav class="navbar navbar-default navbar-static-top">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
+
+
+{% if user|isAuthenticated %}
+
+    <!-- =====================================================
+         APPLICATION HEADER
+         ===================================================== -->
+
+    <header class="vc-topbar">
+
+        <div class="vc-brand">
+
+            <a
+                href="/{% block brand_link %}profile/{% endblock %}"
+                class="vc-brand-link"
+            >
+
+                <span class="vc-brand-icon">
+                    <i class="fa fa-hospital-o"></i>
+                </span>
+
+                <span class="vc-brand-name">
+                    VirtualClinic
+                </span>
+
+            </a>
+
+        </div>
+
+
+        <div class="vc-topbar-actions">
+
+            <div class="vc-topbar-user">
+
+                <span class="vc-avatar">
+                    {{ user.first_name|default:"U"|slice:":1"|upper }}
+                </span>
+
+                <span class="vc-user-name">
+                    {{ user.first_name|default:user.username }}
+                </span>
+
+            </div>
+
+
+            <div class="dropdown">
+
+                <button
+                    class="vc-icon-button dropdown-toggle"
+                    type="button"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                >
+
+                    <i class="fa fa-ellipsis-v"></i>
+
                 </button>
-                <a class="navbar-brand" href="/{% block brand_link %}profile/{% endblock %}"><i class="fa fa-hospital-o"></i>  VirtualClinic</a>
-            </div>
-            <div id="navbar" class="navbar-collapse collapse">
-                <ul class="nav navbar-nav navbar-right">
-                    {% if user|isAuthenticated %}
-                        <li class="dropdown">
-                            <a href="/profile/" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Account Management <span class="caret"></span></a>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a href="/profile/">Signed in as {{ user.username }}</a></li>
-                                <li class="divider"></li>
-                                <li><a href="/profile/">View Profile<i class="pull-right fa fa-user"></i></a></li>
-                                <li><a href="/profile/update/">Update Profile<i class="pull-right fa fa-pencil"></i></a></li>
-                                <li><a href="/profile/password">Change Password<i class="pull-right fa fa-cog"></i></a></li>
-                                <li class="divider"></li>
-                                <li><a href="/logout">Logout<i class="pull-right fa fa-sign-out"></i></i></a></li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li>
-                            <p class="nav navbar-text" style="color: #FFF">Not signed in</p>
-                        </li>
-                    {% endif %}
-                    <li>
-                        {% block nav_button %}{% endblock %}
+
+
+                <ul
+                    class="dropdown-menu dropdown-menu-right vc-user-menu"
+                >
+
+                    <li class="vc-menu-label">
+                        ACCOUNT
                     </li>
-                    <li><a data-toggle="modal" data-target="#aboutus-modal">About us</a></li>
+
+                    <li>
+                        <a href="/profile/">
+                            <i class="fa fa-user"></i>
+                            View Profile
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/profile/update/">
+                            <i class="fa fa-pencil"></i>
+                            Update Profile
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/profile/password">
+                            <i class="fa fa-lock"></i>
+                            Change Password
+                        </a>
+                    </li>
+
+                    <li class="divider"></li>
+
+                    <li>
+                        <a href="/logout">
+                            <i class="fa fa-sign-out"></i>
+                            Logout
+                        </a>
+                    </li>
+
                 </ul>
+
             </div>
+
+
+            {% block nav_button %}{% endblock %}
+
         </div>
-    </nav>
-    {% if user|isAuthenticated %}
-        <nav class="navbar navbar-default sidebar" role="navigation">
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-sidebar-navbar-collapse-1">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                </div>
-                <div class="collapse navbar-collapse" id="bs-sidebar-navbar-collapse-1">
-                    <ul class="nav navbar-nav">
-                        {% if user.account.role >= 0 %}
-                            <li class="{% block sidebar_profile %}{% endblock %}"><a href="/profile/">Profile<i class="pull-right fa fa-user"></i></a></li>
-                            <li class="{% block sidebar_message %}{% endblock %}"><a href="/message/list/">Messages<i class="pull-right fa fa-envelope"></i></a></li>
-                        {% endif %}
-                        {% if user.account.role == 10 or user.account.role == 20 %}
-                            <li class="{% block sidebar_appointment %}{% endblock %}"><a href="/appointment/list/">Appointments<i class="pull-right fa fa-calendar"></i></a></li>
-                            <li class="{% block sidebar_medicalinfo %}{% endblock %}"><a href="{% if user.account.role == 10 %}/medicalinfo/patient/{% else %}/medicalinfo/list/{% endif %}">Medical Info<i class="pull-right fa fa-heartbeat"></i></a></li>
-                        {% endif %}
-                        {% if user.account.role == 40 or user.account.role == 10 or user.account.role == 20 %}
-                            <li class="{% block sidebar_medtest %}{% endblock %}"><a href="/medtest/list">Medical Tests<i class="pull-right fa fa-flask"></i></a></li>
-                        {% endif %}
-                        {% if user.account.role == 10 or user.account.role == 20 or user.account.role == 50 %}
-                            <li class="{% block sidebar_prescription %}{% endblock %}"><a href="/prescription/list/">Prescriptions<i class="pull-right fa fa-file-text"></i></a></li>
-                        {% endif %}
-                        {% if user.account.role == 30 %}
-                            <li class="{% block sidebar_admin_hospital %}{% endblock %}"><a href="/admin/add_hospital/">Add hospitals<i class="pull-right fa fa-hospital-o"></i></a></li>
-                            <li class="{% block sidebar_admin_symptom %}{% endblock %}"><a href="/admin/symptom/">Manage Symptom<i class="pull-right fa fa-hospital-o"></i></a></li>
-                            <li class="{% block sidebar_admin_speciality %}{% endblock %}"><a href="/admin/speciality/">Manage Speciality<i class="pull-right fa fa-stethoscope"></i></a></li>
-                            <li class="{% block sidebar_admin_users %}{% endblock %}"><a href="/admin/users/">Manage Users<i class="pull-right fa fa-users"></i></a></li>
-                            <li class="{% block sidebar_admin_activity %}{% endblock %}"><a href="/admin/activity/">View Activity<i class="pull-right fa fa-eye"></i></a></li>
-                            <li class="{% block sidebar_admin_statistics %}{% endblock %}"><a href="/admin/statistics/">View Statistics<i class="pull-right fa fa-bar-chart"></i></a></li>
-                            <li class="{% block sidebar_admin_import %}{% endblock %}"><a href="/admin/import/">CSV Management<i class="pull-right fa fa-upload"></i></a></li>
-                        {% endif %}
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    {% endif %}
-    <div class="container-fluid main">
-        <div class="row">
-            {% if user|isAuthenticated %}
-                <div class="col-sm-12 main">
-            {% else %}
-                <div class="col-sm-offset-3 col-sm-6">
-            {% endif %}
-                <h1 class="page-header">{% block body_header %}{% endblock %}</h1>
-                {% if alert_success %}
-                    <div class="alert alert-success alert-dismissible fade in" role="alert">
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-                        {{ alert_success }}
-                    </div>
-                {% endif %}
-                {% if alert_danger %}
-                    <div class="alert alert-danger alert-dismissible fade in" role="alert">
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-                        {{ alert_danger }}
-                    </div>
-                {% endif %}
-                {% block body %}{% endblock %}
-            </div>
-        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         MOBILE HEADER
+         ===================================================== -->
+
+    <div class="vc-mobile-header">
+
+        <button
+            type="button"
+            class="vc-mobile-menu-button"
+            id="vc-mobile-menu-toggle"
+        >
+            <i class="fa fa-bars"></i>
+        </button>
+
+
+        <a
+            href="/profile/"
+            class="vc-mobile-brand"
+        >
+            <i class="fa fa-hospital-o"></i>
+            VirtualClinic
+        </a>
+
+
+        <a
+            href="/profile/"
+            class="vc-mobile-profile"
+        >
+            <span class="vc-avatar">
+                {{ user.first_name|default:"U"|slice:":1"|upper }}
+            </span>
+        </a>
+
     </div>
-        {% include "aboutus_modal.html" %}
+
+
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+    <aside
+        class="vc-sidebar"
+        id="vc-sidebar"
+    >
+
+        <div class="vc-sidebar-inner">
+
+
+            <div class="vc-sidebar-section">
+
+                <div class="vc-sidebar-label">
+                    MAIN
+                </div>
+
+
+                {% if user.account.role >= 0 %}
+
+                    <a
+                        href="/profile/"
+                        class="vc-nav-item {% block sidebar_profile %}{% endblock %}"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-home"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            Dashboard
+                        </span>
+                    </a>
+
+
+                    <a
+                        href="/profile/"
+                        class="vc-nav-item"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-user"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            Profile
+                        </span>
+                    </a>
+
+
+                    <a
+                        href="/message/list/"
+                        class="vc-nav-item {% block sidebar_message %}{% endblock %}"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-envelope"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            Messages
+                        </span>
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+
+            {% if user.account.role == 10 or user.account.role == 20 %}
+
+                <div class="vc-sidebar-section">
+
+                    <div class="vc-sidebar-label">
+                        CARE
+                    </div>
+
+
+                    <a
+                        href="/appointment/list/"
+                        class="vc-nav-item {% block sidebar_appointment %}{% endblock %}"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-calendar"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            Appointments
+                        </span>
+                    </a>
+
+
+                    <a
+                        href="{% if user.account.role == 10 %}/medicalinfo/patient/{% else %}/medicalinfo/list/{% endif %}"
+                        class="vc-nav-item {% block sidebar_medicalinfo %}{% endblock %}"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-heartbeat"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            Medical Info
+                        </span>
+                    </a>
+
+
+                    <a
+                        href="/medtest/list"
+                        class="vc-nav-item {% block sidebar_medtest %}{% endblock %}"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-flask"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            Medical Tests
+                        </span>
+                    </a>
+
+
+                    <a
+                        href="/prescription/list/"
+                        class="vc-nav-item {% block sidebar_prescription %}{% endblock %}"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-file-text"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            Prescriptions
+                        </span>
+                    </a>
+
+                </div>
+
+
+                <div class="vc-sidebar-section">
+
+                    <div class="vc-sidebar-label">
+                        INTELLIGENCE
+                    </div>
+
+
+                    <a
+                        href="/ai/history/"
+                        class="vc-nav-item"
+                    >
+                        <span class="vc-nav-icon vc-ai-icon">
+                            <i class="fa fa-magic"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            AI History
+                        </span>
+
+                        <span class="vc-nav-badge">
+                            AI
+                        </span>
+
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+
+            {% if user.account.role == 30 %}
+
+                <div class="vc-sidebar-section">
+
+                    <div class="vc-sidebar-label">
+                        ADMINISTRATION
+                    </div>
+
+
+                    <a
+                        href="/admin/add_hospital/"
+                        class="vc-nav-item {% block sidebar_admin_hospital %}{% endblock %}"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-hospital-o"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            Hospitals
+                        </span>
+                    </a>
+
+
+                    <a
+                        href="/admin/symptom/"
+                        class="vc-nav-item {% block sidebar_admin_symptom %}{% endblock %}"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-medkit"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            Symptoms
+                        </span>
+                    </a>
+
+
+                    <a
+                        href="/admin/speciality/"
+                        class="vc-nav-item {% block sidebar_admin_speciality %}{% endblock %}"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-stethoscope"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            Specialities
+                        </span>
+                    </a>
+
+
+                    <a
+                        href="/admin/users/"
+                        class="vc-nav-item {% block sidebar_admin_users %}{% endblock %}"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-users"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            Users
+                        </span>
+                    </a>
+
+
+                    <a
+                        href="/admin/activity/"
+                        class="vc-nav-item {% block sidebar_admin_activity %}{% endblock %}"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-eye"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            Activity
+                        </span>
+                    </a>
+
+
+                    <a
+                        href="/admin/statistics/"
+                        class="vc-nav-item {% block sidebar_admin_statistics %}{% endblock %}"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-bar-chart"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            Statistics
+                        </span>
+                    </a>
+
+
+                    <a
+                        href="/admin/import/"
+                        class="vc-nav-item {% block sidebar_admin_import %}{% endblock %}"
+                    >
+                        <span class="vc-nav-icon">
+                            <i class="fa fa-upload"></i>
+                        </span>
+
+                        <span class="vc-nav-text">
+                            CSV Management
+                        </span>
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+
+        </div>
+
+
+        <div class="vc-sidebar-footer">
+
+            <div class="vc-help-card">
+
+                <div class="vc-help-icon">
+                    <i class="fa fa-question"></i>
+                </div>
+
+                <div>
+
+                    <strong>
+                        Need help?
+                    </strong>
+
+                    <small>
+                        Contact support
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <div
+        class="vc-sidebar-overlay"
+        id="vc-sidebar-overlay"
+    ></div>
+
+
+{% endif %}
+
+
+<!-- =========================================================
+     MAIN CONTENT
+     ========================================================= -->
+
+<main class="vc-main">
+
+    <div class="vc-page-container">
+
+
+        <div class="vc-page-heading">
+
+            <div>
+
+                <div class="vc-breadcrumb">
+                    VirtualClinic
+                    <span>
+                        /
+                    </span>
+                    {% block breadcrumb %}
+                        {% block title_breadcrumb %}
+                        {% endblock %}
+                    {% endblock %}
+                </div>
+
+
+                <h1>
+                    {% block body_header %}
+                    {% endblock %}
+                </h1>
+
+            </div>
+
+
+            <div class="vc-page-actions">
+
+                {% block page_actions %}
+                {% endblock %}
+
+            </div>
+
+        </div>
+
+
+        {% if alert_success %}
+
+            <div
+                class="vc-alert vc-alert-success"
+                role="alert"
+            >
+
+                <i class="fa fa-check-circle"></i>
+
+                <span>
+                    {{ alert_success }}
+                </span>
+
+                <button
+                    type="button"
+                    class="vc-alert-close"
+                    data-dismiss="alert"
+                >
+                    ×
+                </button>
+
+            </div>
+
+        {% endif %}
+
+
+        {% if alert_danger %}
+
+            <div
+                class="vc-alert vc-alert-danger"
+                role="alert"
+            >
+
+                <i class="fa fa-exclamation-circle"></i>
+
+                <span>
+                    {{ alert_danger }}
+                </span>
+
+                <button
+                    type="button"
+                    class="vc-alert-close"
+                    data-dismiss="alert"
+                >
+                    ×
+                </button>
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="vc-content">
+
+            {% block body %}
+            {% endblock %}
+
+        </div>
+
+    </div>
+
+</main>
+
+
+{% include "aboutus_modal.html" %}
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        const toggle =
+            document.getElementById(
+                "vc-mobile-menu-toggle"
+            );
+
+        const sidebar =
+            document.getElementById(
+                "vc-sidebar"
+            );
+
+        const overlay =
+            document.getElementById(
+                "vc-sidebar-overlay"
+            );
+
+
+        if (!toggle || !sidebar) {
+            return;
+        }
+
+
+        function closeSidebar() {
+
+            sidebar.classList.remove(
+                "vc-sidebar-open"
+            );
+
+            if (overlay) {
+
+                overlay.classList.remove(
+                    "vc-overlay-visible"
+                );
+
+            }
+
+        }
+
+
+        toggle.addEventListener(
+            "click",
+            function() {
+
+                sidebar.classList.toggle(
+                    "vc-sidebar-open"
+                );
+
+                if (overlay) {
+
+                    overlay.classList.toggle(
+                        "vc-overlay-visible"
+                    );
+
+                }
+
+            }
+        );
+
+
+        if (overlay) {
+
+            overlay.addEventListener(
+                "click",
+                closeSidebar
+            );
+
+        }
+
+
+        const links =
+            sidebar.querySelectorAll(
+                ".vc-nav-item"
+            );
+
+
+        links.forEach(
+            function(link) {
+
+                link.addEventListener(
+                    "click",
+                    closeSidebar
+                );
+
+            }
+        );
+
+    }
+);
+
+</script>
+
 </body>
-</html>
+
+</html>{% if user|isAuthenticated %}
+
+<div id="vc-copilot-root" class="vc-copilot-root">
+
+    <button
+        type="button"
+        id="vc-copilot-toggle"
+        class="vc-copilot-toggle"
+        aria-label="Open VirtualClinic AI Copilot"
+    >
+        <i class="fa fa-magic"></i>
+        <span>AI</span>
+    </button>
+
+    <section
+        id="vc-copilot-panel"
+        class="vc-copilot-panel"
+        aria-hidden="true"
+    >
+
+        <div class="vc-copilot-header">
+
+            <div class="vc-copilot-title">
+
+                <div class="vc-copilot-avatar">
+                    <i class="fa fa-magic"></i>
+                </div>
+
+                <div>
+                    <strong>VirtualClinic AI</strong>
+                    <small>Copilot</small>
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                id="vc-copilot-new-chat"
+                class="vc-copilot-new-chat"
+            >
+                + New Chat
+            </button>
+
+            <button
+                type="button"
+                id="vc-copilot-close"
+                class="vc-copilot-close"
+                aria-label="Close AI Copilot"
+            >
+                <i class="fa fa-times"></i>
+            </button>
+
+        </div>
+
+        <div id="vc-copilot-history" class="vc-copilot-history"></div>
+
+        <div
+            id="vc-copilot-messages"
+            class="vc-copilot-messages"
+        >
+
+            <div class="vc-copilot-message assistant">
+
+                <div class="vc-copilot-bubble">
+                    Hi {{ user.first_name|default:user.username }}.
+                    I'm your VirtualClinic AI Copilot.
+                    How can I help?
+                </div>
+
+            </div>
+
+        </div>
+
+        <form
+            id="vc-copilot-form"
+            class="vc-copilot-form"
+        >
+
+            {% csrf_token %}
+
+            <input
+                type="text"
+                id="vc-copilot-input"
+                name="message"
+                class="vc-copilot-input"
+                placeholder="Ask about VirtualClinic..."
+                autocomplete="off"
+            >
+
+            <button
+                type="submit"
+                class="vc-copilot-send"
+                aria-label="Send message"
+            >
+                <i class="fa fa-paper-plane"></i>
+            </button>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endif %}
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const toggle = document.getElementById("vc-copilot-toggle");
+    const panel = document.getElementById("vc-copilot-panel");
+    const closeButton = document.getElementById("vc-copilot-close");
+    const form = document.getElementById("vc-copilot-form");
+    const input = document.getElementById("vc-copilot-input");
+    const messages = document.getElementById("vc-copilot-messages");
+
+    let currentConversationId = null;
+
+    const newChatButton = document.getElementById("vc-copilot-new-chat");
+
+    if (newChatButton) {
+        newChatButton.addEventListener("click", async function () {
+            const response = await fetch("/ai/copilot/new/", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.conversation) {
+                return;
+            }
+
+            currentConversationId = data.conversation.id;
+            messages.innerHTML = "";
+            addMessage("New chat started. How can I help?", "assistant");
+
+            const history = document.getElementById("vc-copilot-history");
+
+            if (history) {
+                const row = document.createElement("div");
+                row.className = "vc-copilot-history-row";
+
+                const item = document.createElement("button");
+                item.type = "button";
+                item.className = "vc-copilot-history-item";
+                item.textContent = "New Chat";
+
+                item.addEventListener("click", function () {
+                    currentConversationId = data.conversation.id;
+                    messages.innerHTML = "";
+                    addMessage("New chat started. How can I help?", "assistant");
+                });
+
+                const deleteButton = document.createElement("button");
+                deleteButton.type = "button";
+                deleteButton.className = "vc-copilot-history-delete";
+                deleteButton.innerHTML = '<i class="fa fa-trash"></i>';
+                deleteButton.title = "Delete conversation";
+
+                deleteButton.addEventListener("click", async function (event) {
+                    event.stopPropagation();
+
+                    const deleteResponse = await fetch(
+                        "/ai/copilot/delete/" + data.conversation.id + "/",
+                        {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken":
+                                    document.querySelector("[name=csrfmiddlewaretoken]").value
+                            }
+                        }
+                    );
+
+                    if (deleteResponse.ok) {
+                        row.remove();
+                        currentConversationId = null;
+                        messages.innerHTML = "";
+                        addMessage(
+                            "Conversation deleted. Start a new chat whenever you're ready.",
+                            "assistant"
+                        );
+                    }
+                });
+
+                row.appendChild(item);
+                row.appendChild(deleteButton);
+                history.prepend(row);
+            }
+        });
+    }
+
+    if (!toggle || !panel || !closeButton || !form || !input || !messages) {
+        return;
+    }
+
+
+    function openCopilot() {
+
+        panel.classList.add("vc-copilot-open");
+        panel.setAttribute("aria-hidden", "false");
+
+        input.focus();
+    }
+
+
+    function closeCopilot() {
+
+        panel.classList.remove("vc-copilot-open");
+        panel.setAttribute("aria-hidden", "true");
+    }
+
+
+    function addMessage(text, role) {
+
+        const wrapper = document.createElement("div");
+
+        wrapper.className =
+            "vc-copilot-message " + role;
+
+
+        const bubble = document.createElement("div");
+
+        bubble.className =
+            "vc-copilot-bubble";
+
+        bubble.textContent = text;
+
+
+        wrapper.appendChild(bubble);
+
+        messages.appendChild(wrapper);
+
+        messages.scrollTop =
+            messages.scrollHeight;
+    }
+
+
+    function showTyping() {
+
+        const typing = document.createElement("div");
+
+        typing.className =
+            "vc-copilot-message assistant";
+
+        typing.id =
+            "vc-copilot-typing";
+
+
+        typing.innerHTML = `
+            <div class="vc-copilot-typing">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        `;
+
+
+        messages.appendChild(typing);
+
+        messages.scrollTop =
+            messages.scrollHeight;
+    }
+
+
+    function hideTyping() {
+
+        const typing =
+            document.getElementById(
+                "vc-copilot-typing"
+            );
+
+        if (typing) {
+            typing.remove();
+        }
+    }
+
+
+    toggle.addEventListener(
+        "click",
+        function () {
+
+            if (
+                panel.classList.contains(
+                    "vc-copilot-open"
+                )
+            ) {
+                closeCopilot();
+            } else {
+                openCopilot();
+            }
+
+        }
+    );
+
+
+    async function loadCopilotHistory() {
+        const response = await fetch("/ai/copilot/history/");
+        const data = await response.json();
+
+        const history = document.getElementById("vc-copilot-history");
+
+        if (!history) {
+            return;
+        }
+
+        history.innerHTML = "";
+
+        data.conversations.forEach(function (conversation) {
+            const row = document.createElement("div");
+            row.className = "vc-copilot-history-row";
+
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "vc-copilot-history-item";
+            item.textContent = conversation.title || "New Chat";
+
+            item.addEventListener("click", function () {
+                currentConversationId = conversation.id;
+                messages.innerHTML = "";
+
+                conversation.messages.forEach(function (message) {
+                    addMessage(message.content, message.role);
+                });
+
+                panel.classList.add("vc-copilot-open");
+                panel.setAttribute("aria-hidden", "false");
+                input.focus();
+            });
+
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.className = "vc-copilot-history-delete";
+            deleteButton.innerHTML = '<i class="fa fa-trash"></i>';
+            deleteButton.title = "Delete conversation";
+
+            deleteButton.addEventListener("click", async function (event) {
+                event.stopPropagation();
+
+                const response = await fetch(
+                    "/ai/copilot/delete/" + conversation.id + "/",
+                    {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken":
+                                document.querySelector("[name=csrfmiddlewaretoken]").value
+                        }
+                    }
+                );
+
+                if (response.ok) {
+                    row.remove();
+
+                    if (currentConversationId === conversation.id) {
+                        currentConversationId = null;
+                        messages.innerHTML = "";
+                        addMessage(
+                            "Conversation deleted. Start a new chat whenever you're ready.",
+                            "assistant"
+                        );
+                    }
+                }
+            });
+
+            row.appendChild(item);
+            row.appendChild(deleteButton);
+            history.appendChild(row);
+        });
+    }
+
+
+    loadCopilotHistory();
+
+    closeButton.addEventListener(
+        "click",
+        closeCopilot
+    );
+
+
+    function addConfirmationCard(data) {
+        if (!data.confirmation) {
+            return;
+        }
+
+        const item = data.confirmation;
+
+        function formatCopilotDate(value) {
+            const date = new Date(value);
+
+            return date.toLocaleString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit"
+            });
+        }
+
+        const isCancellation = item.action === "prepare_cancel";
+
+        const oldStart = item.old_start
+            ? formatCopilotDate(item.old_start)
+            : formatCopilotDate(item.start_time);
+
+        const newStart = item.new_start
+            ? formatCopilotDate(item.new_start)
+            : "";
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "vc-copilot-confirmation";
+
+        const title = document.createElement("div");
+        title.className = "vc-copilot-confirmation-title";
+        title.textContent = isCancellation
+            ? "Confirm appointment cancellation"
+            : "Confirm appointment change";
+
+        const currentRow = document.createElement("div");
+        currentRow.className = "vc-copilot-confirmation-row";
+        currentRow.innerHTML =
+            "<span>" +
+            (isCancellation ? "Appointment" : "Current") +
+            "</span><strong>" +
+            oldStart +
+            "</strong>";
+
+        const newRow = document.createElement("div");
+        newRow.className = "vc-copilot-confirmation-row";
+        newRow.innerHTML =
+            "<span>New</span><strong>" +
+            newStart +
+            "</strong>";
+
+        if (isCancellation) {
+            newRow.style.display = "none";
+        }
+
+        const actions = document.createElement("div");
+        actions.className = "vc-copilot-confirmation-actions";
+
+        const cancelButton = document.createElement("button");
+        cancelButton.type = "button";
+        cancelButton.className = "vc-copilot-confirm-cancel";
+        cancelButton.textContent = "Cancel";
+
+        const confirmButton = document.createElement("button");
+        confirmButton.type = "button";
+        confirmButton.className = "vc-copilot-confirm-ok";
+        confirmButton.textContent = isCancellation ? "Cancel appointment" : "Confirm change";
+
+        cancelButton.addEventListener("click", function () {
+            wrapper.remove();
+        });
+
+        confirmButton.addEventListener("click", async function () {
+            confirmButton.disabled = true;
+            confirmButton.textContent =
+                isCancellation ? "Cancelling..." : "Updating...";
+
+            try {
+                const endpoint = isCancellation
+                    ? "/ai/copilot/appointments/confirm-cancel/"
+                    : "/ai/copilot/appointments/confirm-reschedule/";
+
+                const payload = {
+                    appointment_id: item.id,
+                    csrfmiddlewaretoken:
+                        document.querySelector(
+                            "[name=csrfmiddlewaretoken]"
+                        ).value
+                };
+
+                if (!isCancellation) {
+                    payload.new_start = item.new_start;
+                    payload.new_end = item.new_end;
+                }
+
+                const response = await fetch(
+                    endpoint,
+                    {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        body: new URLSearchParams(payload)
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(
+                        result.error ||
+                        result.message ||
+                        (
+                            isCancellation
+                                ? "Unable to cancel appointment."
+                                : "Unable to update appointment."
+                        )
+                    );
+                }
+
+                wrapper.remove();
+
+                addMessage(
+                    isCancellation
+                        ? "Appointment #" +
+                          result.data.id +
+                          " was successfully cancelled."
+                        : "Appointment #" +
+                          result.data.id +
+                          " was successfully rescheduled.",
+                    "assistant"
+                );
+
+                await loadCopilotHistory();
+
+            } catch (error) {
+                confirmButton.disabled = false;
+                confirmButton.textContent =
+                    isCancellation
+                        ? "Cancel appointment"
+                        : "Confirm change";
+
+                addMessage(
+                    error.message || "Something went wrong.",
+                    "assistant"
+                );
+            }
+        });
+
+        actions.appendChild(cancelButton);
+        actions.appendChild(confirmButton);
+
+        wrapper.appendChild(title);
+        wrapper.appendChild(currentRow);
+        wrapper.appendChild(newRow);
+        wrapper.appendChild(actions);
+
+        messages.appendChild(wrapper);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    form.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const text =
+                input.value.trim();
+
+
+            if (!text) {
+                return;
+            }
+
+
+            const formData =
+                new FormData(form);
+
+            if (currentConversationId) {
+                formData.append("conversation_id", currentConversationId);
+            }
+
+
+            addMessage(
+                text,
+                "user"
+            );
+
+
+            input.value = "";
+
+
+            showTyping();
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/ai/copilot/",
+                        {
+                            method: "POST",
+
+                            body: formData,
+
+                            headers: {
+                                "X-Requested-With":
+                                    "XMLHttpRequest"
+                            }
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+                if (data.conversation_id) {
+                    currentConversationId = data.conversation_id;
+                }
+
+
+                hideTyping();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        "Unable to contact VirtualClinic AI."
+                    );
+                }
+
+
+                vcCopilotRenderResponse(data);
+                addConfirmationCard(data);
+
+                await loadCopilotHistory();
+
+
+            } catch (error) {
+
+                hideTyping();
+
+
+                addMessage(
+                    error.message ||
+                    "Something went wrong.",
+                    "assistant"
+                );
+
+            }
+
+        }
+    );
+
+});
+
+</script>
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const messages = document.getElementById("vc-copilot-messages");
+
+
+
+
+
+    if (!messages) {
+        return;
+    }
+
+
+    const originalAddMessage = window.vcCopilotAddMessage;
+
+
+    window.vcCopilotRenderResponse = function (data) {
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "vc-copilot-message assistant";
+
+
+        const bubble = document.createElement("div");
+        bubble.className = "vc-copilot-bubble";
+
+
+        const text = document.createElement("div");
+        text.textContent = data.message || "";
+        bubble.appendChild(text);
+
+
+        if (Array.isArray(data.links) && data.links.length) {
+
+            const linksContainer = document.createElement("div");
+            linksContainer.className = "vc-copilot-links";
+
+
+            data.links.forEach(function (link) {
+
+                if (!link.label || !link.url) {
+                    return;
+                }
+
+
+                const anchor = document.createElement("a");
+
+                anchor.href = link.url;
+                anchor.className = "vc-copilot-link";
+                anchor.textContent = link.label;
+
+                anchor.target = "_self";
+
+
+                linksContainer.appendChild(anchor);
+
+            });
+
+
+            bubble.appendChild(linksContainer);
+        }
+
+
+        wrapper.appendChild(bubble);
+
+        messages.appendChild(wrapper);
+
+        messages.scrollTop =
+            messages.scrollHeight;
+    };
+
+});
+
+</script>

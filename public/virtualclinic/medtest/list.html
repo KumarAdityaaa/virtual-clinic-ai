@@ -1,56 +1,454 @@
 {% extends "base.html" %}
+
 {% load app_filters %}
+
+
 {% block title %}
-    View Medical Tests
+    Medical Tests
 {% endblock %}
+
+
 {% block sidebar_medtest %}
     active
 {% endblock %}
+
+
 {% block body_header %}
-    View Uploaded Medical Tests
-     {% if user.account.role == 40 %}
-        <br>
-        <a class="btn btn-success btn-sm" href="/medtest/upload/" role="button">Upload Medical Test</a>
-    {% endif %}
+    Medical Tests
 {% endblock %}
+
+
+{% block page_actions %}
+
+    {% if user.account.role == 40 %}
+
+        <a
+            href="/medtest/upload/"
+            class="btn btn-primary"
+        >
+            <i class="fa fa-upload"></i>
+            Upload Medical Test
+        </a>
+
+    {% endif %}
+
+{% endblock %}
+
+
 {% block body %}
-    <table id="datatable" class="table table-hover table-striped table-bordered">
-        <thead>
-            <th>Doctor</th>
-            <th>Patient</th>
-            <th>Name</th>
-            <th>Hospital</th>
-            <th>Date</th>
-            <th>Status</th>
-            <th data-dafaultsort='disabled'>Options</th>
-        </thead>
-        <tbody>
-            {% for foo in query %}
-                <tr>
-                    <td>{{ foo.doctor.profile }}</td>
-                    <td>{{ foo.patient.profile }}</td>
-                    <td>{{ foo.name }}</td>
-                    <td>{{ foo.hospital.name }}</td>
-                    <td>{{ foo.date }}</td>
-                    <td>{% if foo.completed %}Completed{% else %}In Progress{% endif %}</td>
-                    <td>
-                        <a class="btn btn-primary btn-sm" href="/medtest/display/?pk={{ foo.pk }}" role="button">Display</a>
-                        {% if user.account.role == 40 %}
-                            <a class="btn btn-warning btn-sm" href="/medtest/update/?pk={{ foo.pk }}" role="button">Update</a>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <script type="text/javascript">
-        $(document).ready(function () {
-           $('#datatable').DataTable({
-               "columnDefs":[
-                   {"orderable":false,"targets":6},
-                   {"searchable":false,"targets":6}
-               ]
-           });
-        });
-    </script>
+
+<div class="vc-medtest-page">
+
+
+    <!-- =====================================================
+         INTRO
+         ===================================================== -->
+
+    <div class="vc-medtest-intro">
+
+        <div>
+
+            <span class="vc-ai-eyebrow">
+                CLINICAL DIAGNOSTICS
+            </span>
+
+            <h2>
+                Medical Test Records
+            </h2>
+
+            <p>
+                Review uploaded laboratory and diagnostic test
+                records, their status, and associated patients.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY
+         ===================================================== -->
+
+    <div class="vc-medtest-summary">
+
+
+        <div class="vc-medtest-summary-card">
+
+            <div class="vc-medtest-summary-icon blue">
+                <i class="fa fa-flask"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    TOTAL TESTS
+                </span>
+
+                <strong>
+                    {{ query|length }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="vc-medtest-summary-card">
+
+            <div class="vc-medtest-summary-icon green">
+                <i class="fa fa-check-circle"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    TEST RECORDS
+                </span>
+
+                <strong>
+                    Available
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="vc-medtest-summary-card">
+
+            <div class="vc-medtest-summary-icon orange">
+                <i class="fa fa-clock-o"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    WORKFLOW
+                </span>
+
+                <strong>
+                    Track test progress
+                </strong>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         MAIN CARD
+         ===================================================== -->
+
+    <section class="vc-medtest-card">
+
+
+        <div class="vc-medtest-card-header">
+
+            <div>
+
+                <span class="vc-panel-eyebrow">
+                    DIAGNOSTIC RECORDS
+                </span>
+
+                <h3>
+                    Uploaded Medical Tests
+                </h3>
+
+            </div>
+
+
+            <div class="vc-medtest-note">
+
+                <i class="fa fa-shield"></i>
+
+                Clinical information
+
+            </div>
+
+        </div>
+
+
+        <div class="vc-medtest-table-wrap">
+
+            <table
+                id="datatable"
+                class="table vc-medtest-table"
+            >
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Doctor
+                        </th>
+
+                        <th>
+                            Patient
+                        </th>
+
+                        <th>
+                            Test
+                        </th>
+
+                        <th>
+                            Hospital
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Options
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for foo in query %}
+
+                        <tr>
+
+
+                            <!-- Doctor -->
+
+                            <td>
+
+                                <div class="vc-medtest-person">
+
+                                    <div class="vc-medtest-avatar doctor">
+
+                                        {{ foo.doctor.profile.firstname|slice:":1"|upper }}
+
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            {{ foo.doctor.profile }}
+                                        </strong>
+
+                                        <span>
+                                            Doctor
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Patient -->
+
+                            <td>
+
+                                <div class="vc-medtest-person">
+
+                                    <div class="vc-medtest-avatar patient">
+
+                                        {{ foo.patient.profile.firstname|slice:":1"|upper }}
+
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            {{ foo.patient.profile }}
+                                        </strong>
+
+                                        <span>
+                                            Patient
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Test -->
+
+                            <td>
+
+                                <div class="vc-medtest-name">
+
+                                    <div class="vc-medtest-icon">
+                                        <i class="fa fa-flask"></i>
+                                    </div>
+
+                                    <strong>
+                                        {{ foo.name }}
+                                    </strong>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Hospital -->
+
+                            <td>
+
+                                <div class="vc-medtest-hospital">
+
+                                    <i class="fa fa-hospital-o"></i>
+
+                                    <span>
+                                        {{ foo.hospital.name }}
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Date -->
+
+                            <td>
+
+                                <div class="vc-medtest-date">
+
+                                    <strong>
+                                        {{ foo.date|date:"M d, Y" }}
+                                    </strong>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Status -->
+
+                            <td>
+
+                                {% if foo.completed %}
+
+                                    <span
+                                        class="vc-medtest-status completed"
+                                    >
+
+                                        <span></span>
+
+                                        Completed
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span
+                                        class="vc-medtest-status progress"
+                                    >
+
+                                        <span></span>
+
+                                        In Progress
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Options -->
+
+                            <td>
+
+                                <div class="vc-medtest-actions">
+
+
+                                    <a
+                                        class="vc-medtest-view"
+                                        href="/medtest/display/?pk={{ foo.pk }}"
+                                    >
+
+                                        <i class="fa fa-eye"></i>
+
+                                        Display
+
+                                    </a>
+
+
+                                    {% if user.account.role == 40 %}
+
+                                        <a
+                                            class="vc-medtest-update"
+                                            href="/medtest/update/?pk={{ foo.pk }}"
+                                        >
+
+                                            <i class="fa fa-pencil"></i>
+
+                                            Update
+
+                                        </a>
+
+                                    {% endif %}
+
+
+                                </div>
+
+                            </td>
+
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+</div>
+
+
+<script>
+
+$(document).ready(function() {
+
+    $("#datatable").DataTable({
+
+        pageLength: 10,
+
+        lengthMenu: [
+            [10, 25, 50, 100],
+            [10, 25, 50, 100]
+        ],
+
+        columnDefs: [
+
+            {
+                orderable: false,
+                searchable: false,
+                targets: 6
+            }
+
+        ]
+
+    });
+
+});
+
+</script>
+
+
 {% endblock %}

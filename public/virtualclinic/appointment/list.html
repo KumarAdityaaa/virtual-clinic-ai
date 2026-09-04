@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+
 {% load app_filters %}
 
 {% block title %}
-    Views Appointments
+    Appointments
 {% endblock %}
 
 {% block sidebar_appointment %}
@@ -10,58 +11,156 @@
 {% endblock %}
 
 {% block body_header %}
-    View Appointments
-    <br>
-    <a class="btn btn-success btn-sm"
-       href="/appointment/create/"
-       role="button">
+    Appointments
+{% endblock %}
+
+{% block page_actions %}
+
+    <a
+        href="/appointment/create/"
+        class="btn btn-primary"
+    >
+        <i class="fa fa-plus"></i>
         New Appointment
     </a>
 
-    <a class="btn btn-primary btn-sm"
-       href="/appointment/calendar/"
-       role="button">
+    <a
+        href="/appointment/calendar/"
+        class="btn btn-default"
+    >
+        <i class="fa fa-calendar"></i>
         Calendar View
     </a>
+
 {% endblock %}
+
 
 {% block body %}
 
-<div role="tabpanel">
-
-    <ul class="nav nav-tabs" role="tablist">
-
-        <li role="presentation" class="active">
-            <a href="#appointments-active"
-               id="appointments-active"
-               role="tab"
-               data-toggle="tab">
-                Active Appointments
-            </a>
-        </li>
-
-        <li role="presentation">
-            <a href="#appointments-cancelled"
-               id="appointments-cancelled"
-               role="tab"
-               data-toggle="tab">
-                Cancelled Appointments
-            </a>
-        </li>
-
-    </ul>
+<div class="vc-appointments-page">
 
 
-    <div class="tab-content">
+    <!-- =====================================================
+         INTRO
+         ===================================================== -->
 
-        <div role="tabpanel"
-             class="tab-pane active"
-             id="appointments-table">
+    <div class="vc-page-intro">
 
-            <br>
+        <div>
 
-            <table id="datatable"
-                   class="table table-hover table-striped table-bordered">
+            <h2>
+                Manage your appointments
+            </h2>
+
+            <p>
+                View, update and manage your clinical consultations
+                from one place.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         APPOINTMENT TABS
+         ===================================================== -->
+
+    <div class="vc-appointment-tabs">
+
+        <button
+            type="button"
+            class="vc-appointment-tab active"
+            id="appointments-active"
+        >
+
+            <span class="vc-tab-icon">
+                <i class="fa fa-calendar-check-o"></i>
+            </span>
+
+            <span class="vc-tab-content">
+
+                <strong>
+                    Active Appointments
+                </strong>
+
+                <small>
+                    Upcoming and ongoing consultations
+                </small>
+
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="vc-appointment-tab"
+            id="appointments-cancelled"
+        >
+
+            <span class="vc-tab-icon vc-tab-cancelled">
+                <i class="fa fa-calendar-times-o"></i>
+            </span>
+
+            <span class="vc-tab-content">
+
+                <strong>
+                    Cancelled Appointments
+                </strong>
+
+                <small>
+                    Past or cancelled consultations
+                </small>
+
+            </span>
+
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         TABLE CARD
+         ===================================================== -->
+
+    <div class="vc-appointments-card">
+
+
+        <div class="vc-appointments-card-header">
+
+            <div>
+
+                <span class="vc-panel-eyebrow">
+                    SCHEDULE
+                </span>
+
+                <h3>
+                    Appointment List
+                </h3>
+
+            </div>
+
+
+            <div class="vc-appointment-summary">
+
+                <div class="vc-summary-dot"></div>
+
+                <span id="appointment-view-label">
+                    Active appointments
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="vc-appointments-table-wrap">
+
+            <table
+                id="datatable"
+                class="table vc-appointments-table"
+            >
 
                 <thead>
 
@@ -77,33 +176,41 @@
                             {% endif %}
                         </th>
 
+
                         <th>
                             Description
                         </th>
+
 
                         <th>
                             Hospital
                         </th>
 
+
                         <th>
                             Start Time
                         </th>
+
 
                         <th>
                             End Time
                         </th>
 
+
                         <th>
                             Status
                         </th>
 
-                        <th data-defaultsort="disabled">
+
+                        <th>
                             Options
                         </th>
+
 
                         <th>
                             Type
                         </th>
+
 
                         <th>
                             AI Analysis
@@ -122,39 +229,105 @@
 
                         <td>
 
-                            {% if user.account.role != 20 %}
-                                {{ appointment.doctor.profile }}
-                            {% endif %}
+                            <div class="vc-person-cell">
 
-                            {% if user.account.role != 10 %}
-                                {{ appointment.patient.profile }}
-                            {% endif %}
+                                <div class="vc-person-avatar">
+
+                                    {% if user.account.role != 20 %}
+
+                                        {{ appointment.doctor.profile.firstname|slice:":1"|upper }}
+
+                                    {% else %}
+
+                                        {{ appointment.patient.profile.firstname|slice:":1"|upper }}
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <div class="vc-person-info">
+
+                                    <strong>
+
+                                        {% if user.account.role != 20 %}
+
+                                            {{ appointment.doctor.profile }}
+
+                                        {% endif %}
+
+                                        {% if user.account.role != 10 %}
+
+                                            {{ appointment.patient.profile }}
+
+                                        {% endif %}
+
+                                    </strong>
+
+                                </div>
+
+                            </div>
 
                         </td>
 
 
                         <td>
-                            {{ appointment.description }}
+
+                            <div class="vc-description-cell">
+
+                                {{ appointment.description|default:"No description provided." }}
+
+                            </div>
+
                         </td>
 
 
                         <td>
-                            {{ appointment.hospital.name }}
+
+                            <div class="vc-hospital-cell">
+
+                                <i class="fa fa-hospital-o"></i>
+
+                                <span>
+                                    {{ appointment.hospital.name }}
+                                </span>
+
+                            </div>
+
                         </td>
 
 
                         <td>
-                            {{ appointment.startTime }}
+
+                            <div class="vc-time-cell">
+
+                                <strong>
+                                    {{ appointment.startTime|date:"M d, Y" }}
+                                </strong>
+
+                                <span>
+                                    {{ appointment.startTime|date:"g:i A" }}
+                                </span>
+
+                            </div>
+
                         </td>
 
 
                         <td>
-                            {{ appointment.endTime }}
-                        </td>
 
+                            <div class="vc-time-cell">
 
-                        <td>
-                            {{ appointment.status }}
+                                <strong>
+                                    {{ appointment.endTime|date:"M d, Y" }}
+                                </strong>
+
+                                <span>
+                                    {{ appointment.endTime|date:"g:i A" }}
+                                </span>
+
+                            </div>
+
                         </td>
 
 
@@ -162,38 +335,24 @@
 
                             {% if appointment.status == "Active" %}
 
-                                <a class="btn btn-warning btn-sm"
-                                   href="/appointment/update/?pk={{ appointment.pk }}"
-                                   role="button">
-                                    Update
-                                </a>
+                                <span class="vc-status-badge vc-status-active">
+                                    <span></span>
+                                    Active
+                                </span>
 
-                                {% if not user.account.role == 0 %}
+                            {% elif appointment.status == "Cancelled" %}
 
-                                    <script type="text/javascript">
+                                <span class="vc-status-badge vc-status-cancelled">
+                                    <span></span>
+                                    Cancelled
+                                </span>
 
-                                        function proxy{{ appointment.pk }}() {
+                            {% else %}
 
-                                            configureModal(
-                                                {{ appointment.pk }},
-                                                '{{ appointment.startTime }}',
-                                                '{{ appointment.hospital.name|sanitizeJS }}'
-                                            );
-
-                                        };
-
-                                    </script>
-
-                                    <button
-                                        onclick="proxy{{ appointment.pk }}()"
-                                        type="button"
-                                        class="btn btn-danger btn-sm"
-                                        data-toggle="modal"
-                                        data-target="#confirm-modal">
-                                        Cancel
-                                    </button>
-
-                                {% endif %}
+                                <span class="vc-status-badge">
+                                    <span></span>
+                                    {{ appointment.status }}
+                                </span>
 
                             {% endif %}
 
@@ -201,7 +360,83 @@
 
 
                         <td>
-                            {{ appointment.appointment_type }}
+
+                            <div class="vc-table-actions">
+
+                                {% if appointment.status == "Active" %}
+
+                                    <a
+                                        class="btn btn-warning btn-sm"
+                                        href="/appointment/update/?pk={{ appointment.pk }}"
+                                        title="Update appointment"
+                                    >
+                                        <i class="fa fa-pencil"></i>
+                                        Update
+                                    </a>
+
+
+                                    {% if not user.account.role == 0 %}
+
+                                        <script type="text/javascript">
+
+                                            function proxy{{ appointment.pk }}() {
+
+                                                configureModal(
+                                                    {{ appointment.pk }},
+                                                    '{{ appointment.startTime }}',
+                                                    '{{ appointment.hospital.name|sanitizeJS }}'
+                                                );
+
+                                            }
+
+                                        </script>
+
+
+                                        <button
+                                            type="button"
+                                            class="btn btn-danger btn-sm"
+                                            onclick="proxy{{ appointment.pk }}()"
+                                            data-toggle="modal"
+                                            data-target="#confirm-modal"
+                                            title="Cancel appointment"
+                                        >
+                                            <i class="fa fa-times"></i>
+                                            Cancel
+                                        </button>
+
+                                    {% endif %}
+
+                                {% else %}
+
+                                    <span class="vc-muted-action">
+                                        No actions
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            {% if appointment.appointment_type == "Online" %}
+
+                                <span class="vc-type-badge vc-type-online">
+                                    <i class="fa fa-video-camera"></i>
+                                    Online
+                                </span>
+
+                            {% else %}
+
+                                <span class="vc-type-badge vc-type-offline">
+                                    <i class="fa fa-building-o"></i>
+                                    {{ appointment.appointment_type }}
+                                </span>
+
+                            {% endif %}
+
                         </td>
 
 
@@ -212,27 +447,39 @@
                                 {% if user.account.role == 20 %}
 
                                     <a
-                                        class="btn btn-info btn-sm"
+                                        class="vc-ai-button"
                                         href="/ai/?appointment_id={{ appointment.pk }}"
                                     >
+
+                                        <i class="fa fa-magic"></i>
+
                                         Review AI
+
                                     </a>
 
                                 {% else %}
 
                                     <a
-                                        class="btn btn-info btn-sm"
+                                        class="vc-ai-button"
                                         href="/ai/?appointment_id={{ appointment.pk }}"
                                     >
+
+                                        <i class="fa fa-magic"></i>
+
                                         View AI
+
                                     </a>
 
                                 {% endif %}
 
                             {% else %}
 
-                                <span class="text-muted">
+                                <span class="vc-ai-pending">
+
+                                    <span class="vc-ai-pending-dot"></span>
+
                                     Not analyzed
+
                                 </span>
 
                             {% endif %}
@@ -251,6 +498,7 @@
 
     </div>
 
+
 </div>
 
 
@@ -262,102 +510,173 @@
     var virtualclinic = {};
 
     virtualclinic.active = [];
+
     virtualclinic.cancelled = [];
 
 
-    function configureModal(pk, start, hospital) {
+    function configureModal(
+        pk,
+        start,
+        hospital
+    ) {
 
         document.getElementById(
-            'confirm-modal-body'
+            "confirm-modal-body"
         ).innerHTML =
-            'Are you sure you want to cancel your appointment on '
-            .concat(start, ' at ', hospital, '?');
+            "Are you sure you want to cancel your appointment on "
+            .concat(
+                start,
+                " at ",
+                hospital,
+                "?"
+            );
+
 
         document.getElementById(
-            'confirm-modal-hidden'
+            "confirm-modal-hidden"
         ).value = pk;
+
     }
 
 
     function displayActive() {
 
-        var table = $('#datatable').DataTable();
+        var table =
+            $("#datatable").DataTable();
+
 
         table.rows().remove();
+
 
         table.rows.add(
             virtualclinic.active
         ).draw();
+
+
+        $("#appointment-view-label")
+            .text(
+                "Active appointments"
+            );
+
+
+        $(".vc-appointment-tab")
+            .removeClass(
+                "active"
+            );
+
+
+        $("#appointments-active")
+            .addClass(
+                "active"
+            );
+
     }
 
 
     function displayCancelled() {
 
-        var table = $('#datatable').DataTable();
+        var table =
+            $("#datatable").DataTable();
+
 
         table.rows().remove();
+
 
         table.rows.add(
             virtualclinic.cancelled
         ).draw();
+
+
+        $("#appointment-view-label")
+            .text(
+                "Cancelled appointments"
+            );
+
+
+        $(".vc-appointment-tab")
+            .removeClass(
+                "active"
+            );
+
+
+        $("#appointments-cancelled")
+            .addClass(
+                "active"
+            );
+
     }
 
 
     $(document).ready(function() {
 
-        $('#datatable').DataTable({
 
-            "columnDefs": [
+        $("#datatable").DataTable({
+
+            pageLength: 10,
+
+            lengthMenu: [
+                [10, 25, 50, 100],
+                [10, 25, 50, 100]
+            ],
+
+            columnDefs: [
+
                 {
-                    "orderable": false,
-                    "targets": 6
-                },
-                {
-                    "searchable": false,
-                    "targets": 6
+                    orderable: false,
+                    searchable: false,
+                    targets: 6
                 }
+
             ]
 
         });
 
 
-        $('#datatable').DataTable().rows().every(
-            function() {
+        $("#datatable")
+            .DataTable()
+            .rows()
+            .every(
+                function() {
 
-                if (
-                    this.data()[5] == "Active"
-                ) {
+                    if (
+                        this.data()[5]
+                        .indexOf("Active") !== -1
+                    ) {
 
-                    virtualclinic.active.push(
-                        this.data()
-                    );
+                        virtualclinic.active.push(
+                            this.data()
+                        );
 
-                } else if (
-                    this.data()[5] == "Cancelled"
-                ) {
+                    }
+                    else if (
+                        this.data()[5]
+                        .indexOf("Cancelled") !== -1
+                    ) {
 
-                    virtualclinic.cancelled.push(
-                        this.data()
-                    );
+                        virtualclinic.cancelled.push(
+                            this.data()
+                        );
+
+                    }
 
                 }
-
-            }
-        );
+            );
 
 
-        $('#appointments-active').click(
-            function(e) {
-                displayActive();
-            }
-        );
+        $("#appointments-active")
+            .click(
+                function() {
+                    displayActive();
+                }
+            );
 
 
-        $('#appointments-cancelled').click(
-            function(e) {
-                displayCancelled();
-            }
-        );
+        $("#appointments-cancelled")
+            .click(
+                function() {
+                    displayCancelled();
+                }
+            );
 
 
         displayActive();

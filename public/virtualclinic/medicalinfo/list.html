@@ -1,46 +1,374 @@
 {% extends "base.html" %}
+
 {% load app_filters %}
+
+
 {% block title %}
-    View Medical Info
+    Medical Information
 {% endblock %}
+
+
 {% block sidebar_medicalinfo %}
     active
 {% endblock %}
+
+
 {% block body_header %}
-    View Patient's Medical Information
+    Medical Information
 {% endblock %}
+
+
+{% block page_actions %}
+
+    {% if user.account.role != 20 %}
+
+        <a
+            href="/medicalinfo/update/"
+            class="btn btn-primary"
+        >
+            <i class="fa fa-pencil"></i>
+            Update Medical Information
+        </a>
+
+    {% endif %}
+
+{% endblock %}
+
+
 {% block body %}
-    <table id="datatable" class="table table-hover table-striped table-bordered">
-        <thead>
-            <th>Patient</th>
-            <th>Blood Type</th>
-            <th>Allergy</th>
-            <th data-dafultsort="disabled">Options</th>
-        </thead>
-        <tbody>
-            {% for medicalinfo in query %}
-                <tr>
-                    <td>{{ medicalinfo.account.profile }}</td>
-                    <td>{{ medicalinfo.bloodType }}</td>
-                    <td>{{ medicalinfo.allergy }}</td>
-                    <td>
-                        {% if not user.account.role == 20 %}
-                            <a class="btn btn-warning btn-sm" href="/medicalinfo/update/?pk={{ medicalinfo.pk }}" role="button">Update</a>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-                    
-        </tbody>
-    </table>
-    <script type="text/javascript">
-        $(document).ready(function () {
-           $('#datatable').DataTable({
-              "columnDefs":[
-                  {"orderable":false,"targets":3},
-                  {"searchable":false,"targets":3}
-              ]
-           });
-        });
-    </script>
+
+<div class="vc-medical-page">
+
+
+    <!-- =====================================================
+         INTRO
+         ===================================================== -->
+
+    <div class="vc-medical-intro">
+
+        <div>
+
+            <span class="vc-ai-eyebrow">
+                CLINICAL RECORDS
+            </span>
+
+            <h2>
+                Patient Medical Information
+            </h2>
+
+            <p>
+                Review blood type and known allergy information
+                for patients in your care.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY
+         ===================================================== -->
+
+    <div class="vc-medical-summary">
+
+        <div class="vc-medical-summary-card">
+
+            <div class="vc-medical-summary-icon blue">
+                <i class="fa fa-users"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    PATIENT RECORDS
+                </span>
+
+                <strong>
+                    {{ query|length }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="vc-medical-summary-card">
+
+            <div class="vc-medical-summary-icon red">
+                <i class="fa fa-warning"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    ALLERGY INFORMATION
+                </span>
+
+                <strong>
+                    Review before consultation
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="vc-medical-summary-card">
+
+            <div class="vc-medical-summary-icon green">
+                <i class="fa fa-heartbeat"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    CLINICAL RECORDS
+                </span>
+
+                <strong>
+                    Available
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         RECORD CARD
+         ===================================================== -->
+
+    <div class="vc-medical-record-card">
+
+
+        <div class="vc-medical-record-header">
+
+            <div>
+
+                <span class="vc-panel-eyebrow">
+                    PATIENT DIRECTORY
+                </span>
+
+                <h3>
+                    Medical Records
+                </h3>
+
+            </div>
+
+
+            <div class="vc-medical-header-note">
+
+                <i class="fa fa-shield"></i>
+
+                Handle patient information securely
+
+            </div>
+
+        </div>
+
+
+        <div class="vc-medical-table-wrap">
+
+            <table
+                id="datatable"
+                class="table vc-medical-table"
+            >
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Patient
+                        </th>
+
+                        <th>
+                            Blood Type
+                        </th>
+
+                        <th>
+                            Allergy
+                        </th>
+
+                        <th>
+                            Options
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for medicalinfo in query %}
+
+                        <tr>
+
+
+                            <!-- Patient -->
+
+                            <td>
+
+                                <div class="vc-medical-patient">
+
+                                    <div class="vc-medical-avatar">
+
+                                        {{ medicalinfo.account.profile.firstname|slice:":1"|upper }}
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <strong>
+                                            {{ medicalinfo.account.profile }}
+                                        </strong>
+
+                                        <span>
+                                            Patient record
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Blood type -->
+
+                            <td>
+
+                                {% if medicalinfo.bloodType %}
+
+                                    <span class="vc-blood-badge">
+
+                                        <i class="fa fa-tint"></i>
+
+                                        {{ medicalinfo.bloodType }}
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="vc-medical-muted">
+                                        Not recorded
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Allergy -->
+
+                            <td>
+
+                                {% if medicalinfo.allergy %}
+
+                                    <div class="vc-allergy">
+
+                                        <span class="vc-allergy-icon">
+                                            <i class="fa fa-warning"></i>
+                                        </span>
+
+                                        <span>
+                                            {{ medicalinfo.allergy }}
+                                        </span>
+
+                                    </div>
+
+                                {% else %}
+
+                                    <span class="vc-no-allergy">
+
+                                        <i class="fa fa-check-circle"></i>
+
+                                        No known allergy recorded
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Options -->
+
+                            <td>
+
+                                {% if not user.account.role == 20 %}
+
+                                    <a
+                                        class="vc-medical-update"
+                                        href="/medicalinfo/update/?pk={{ medicalinfo.pk }}"
+                                    >
+
+                                        <i class="fa fa-pencil"></i>
+
+                                        Update
+
+                                    </a>
+
+                                {% else %}
+
+                                    <span class="vc-medical-muted">
+                                        View only
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+$(document).ready(function() {
+
+    $("#datatable").DataTable({
+
+        pageLength: 10,
+
+        lengthMenu: [
+            [10, 25, 50, 100],
+            [10, 25, 50, 100]
+        ],
+
+        columnDefs: [
+
+            {
+                orderable: false,
+                searchable: false,
+                targets: 3
+            }
+
+        ]
+
+    });
+
+});
+
+</script>
+
+
 {% endblock %}

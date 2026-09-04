@@ -5,201 +5,433 @@
 {% endblock %}
 
 {% block body_header %}
-    AI Health History
+    AI Analysis History
 {% endblock %}
 
 {% block body %}
 
-<div class="panel panel-primary">
+<div class="vc-ai-history-page">
 
-    <div class="panel-heading">
-        AI Analysis History
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="vc-ai-history-header">
+
+        <div>
+
+            <span class="vc-ai-eyebrow">
+                CLINICAL INTELLIGENCE
+            </span>
+
+            <h2>
+                AI Analysis History
+            </h2>
+
+            {% if patient %}
+
+                <p>
+                    Previous AI-assisted assessments for
+                    <strong>{{ patient.profile }}</strong>.
+                </p>
+
+            {% else %}
+
+                <p>
+                    AI assessments associated with your appointments.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+
+        <a
+            href="/ai/"
+            class="vc-ai-history-new"
+        >
+            <i class="fa fa-magic"></i>
+            AI Health Assistant
+        </a>
+
     </div>
 
-    <div class="panel-body">
 
-        {% if patient %}
+    {% if analyses %}
 
-            <p class="lead">
-                Previous AI-assisted assessments for
-                <strong>{{ patient.profile }}</strong>.
-            </p>
+        <!-- =================================================
+             HISTORY SUMMARY
+             ================================================= -->
 
-        {% else %}
+        <div class="vc-ai-history-summary">
 
-            <p class="lead">
-                AI assessments associated with your appointments.
-            </p>
+            <div class="vc-ai-history-summary-item">
 
-        {% endif %}
+                <span>
+                    TOTAL ASSESSMENTS
+                </span>
 
+                <strong>
+                    {{ analyses|length }}
+                </strong>
 
-        {% if analyses %}
-
-            <table
-                id="ai-history-table"
-                class="table table-hover table-striped table-bordered"
-            >
-
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Patient</th>
-                        <th>Symptoms</th>
-                        <th>Primary Assessment</th>
-                        <th>Priority</th>
-                        <th>Confidence</th>
-                        <th>Doctor Review</th>
-                        <th>Final Diagnosis</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
+            </div>
 
 
-                <tbody>
+            <div class="vc-ai-history-summary-item">
 
-                    {% for analysis in analyses %}
+                <span>
+                    PATIENT
+                </span>
 
-                        <tr>
+                <strong>
 
-                            <td>
-                                {{ analysis.created }}
-                            </td>
+                    {% if patient %}
+                        {{ patient.profile }}
+                    {% else %}
+                        Clinical Records
+                    {% endif %}
+
+                </strong>
+
+            </div>
 
 
-                            <td>
+            <div class="vc-ai-history-summary-item">
+
+                <span>
+                    VIEW
+                </span>
+
+                <strong>
+                    Latest First
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TIMELINE
+             ================================================= -->
+
+        <div class="vc-ai-history-timeline">
+
+            {% for analysis in analyses %}
+
+                <article class="vc-ai-history-card">
+
+
+                    <!-- Timeline marker -->
+
+                    <div class="vc-ai-history-marker">
+
+                        <div class="vc-ai-history-marker-icon">
+                            <i class="fa fa-magic"></i>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Card -->
+
+                    <div class="vc-ai-history-card-inner">
+
+
+                        <!-- Date -->
+
+                        <div class="vc-ai-history-date">
+
+                            <i class="fa fa-clock-o"></i>
+
+                            {{ analysis.created|date:"M d, Y · g:i A" }}
+
+                        </div>
+
+
+                        <!-- Patient -->
+
+                        <div class="vc-ai-history-patient">
+
+                            <div class="vc-ai-history-avatar">
 
                                 {% if patient %}
 
-                                    {{ patient.profile }}
+                                    {{ patient.profile.firstname|slice:":1"|upper }}
 
                                 {% else %}
 
-                                    {{ analysis.account.profile }}
+                                    {{ analysis.account.profile.firstname|slice:":1"|upper }}
 
                                 {% endif %}
 
-                            </td>
+                            </div>
 
 
-                            <td>
-                                {{ analysis.symptoms }}
-                            </td>
+                            <div>
+
+                                <span class="vc-ai-history-patient-label">
+                                    PATIENT
+                                </span>
 
 
-                            <td>
-                                {{ analysis.prediction }}
-                            </td>
+                                <strong>
+
+                                    {% if patient %}
+
+                                        {{ patient.profile }}
+
+                                    {% else %}
+
+                                        {{ analysis.account.profile }}
+
+                                    {% endif %}
+
+                                </strong>
+
+                            </div>
+
+                        </div>
 
 
-                            <td>
-                                {{ analysis.priority }}
-                            </td>
+                        <!-- Main assessment -->
+
+                        <div class="vc-ai-history-assessment">
+
+                            <div class="vc-ai-history-assessment-main">
+
+                                <span class="vc-ai-card-eyebrow">
+                                    PRIMARY ASSESSMENT
+                                </span>
+
+                                <h3>
+                                    {{ analysis.prediction }}
+                                </h3>
+
+                            </div>
 
 
-                            <td>
-                                {{ analysis.confidence }}%
-                            </td>
+                            <div class="vc-ai-history-metrics">
 
 
-                            <td>
+                                <div class="vc-ai-history-metric">
+
+                                    <span>
+                                        PRIORITY
+                                    </span>
+
+
+                                    {% if analysis.priority == "HIGH" %}
+
+                                        <strong class="vc-ai-history-priority high">
+                                            <span></span>
+                                            HIGH
+                                        </strong>
+
+                                    {% elif analysis.priority == "MEDIUM" %}
+
+                                        <strong class="vc-ai-history-priority medium">
+                                            <span></span>
+                                            MEDIUM
+                                        </strong>
+
+                                    {% else %}
+
+                                        <strong class="vc-ai-history-priority low">
+                                            <span></span>
+                                            {{ analysis.priority }}
+                                        </strong>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <div class="vc-ai-history-metric">
+
+                                    <span>
+                                        CONFIDENCE
+                                    </span>
+
+                                    <strong>
+                                        {{ analysis.confidence }}%
+                                    </strong>
+
+                                    <div class="vc-ai-history-confidence">
+
+                                        <span
+                                            style="width:{{ analysis.confidence }}%;"
+                                        ></span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Symptoms -->
+
+                        <div class="vc-ai-history-symptoms">
+
+                            <span>
+                                <i class="fa fa-tags"></i>
+                                Symptoms
+                            </span>
+
+
+                            <div>
+                                <span>
+                                    {{ analysis.symptoms }}
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <!-- Review -->
+
+                        <div class="vc-ai-history-review-row">
+
+
+                            <div class="vc-ai-history-review">
+
+
+                                <span class="vc-ai-history-review-label">
+                                    DOCTOR REVIEW
+                                </span>
+
 
                                 {% if analysis.doctor_review == "ACCEPTED" %}
 
-                                    <span class="text-success">
+                                    <strong class="vc-ai-review accepted">
+                                        <i class="fa fa-check-circle"></i>
                                         Accepted
-                                    </span>
+                                    </strong>
 
                                 {% elif analysis.doctor_review == "MODIFIED" %}
 
-                                    <span class="text-warning">
+                                    <strong class="vc-ai-review modified">
+                                        <i class="fa fa-pencil"></i>
                                         Modified
-                                    </span>
+                                    </strong>
 
                                 {% elif analysis.doctor_review == "REJECTED" %}
 
-                                    <span class="text-danger">
+                                    <strong class="vc-ai-review rejected">
+                                        <i class="fa fa-times-circle"></i>
                                         Rejected
-                                    </span>
+                                    </strong>
 
                                 {% else %}
 
-                                    <span class="text-muted">
+                                    <strong class="vc-ai-review pending">
+                                        <i class="fa fa-clock-o"></i>
                                         Pending
-                                    </span>
+                                    </strong>
 
                                 {% endif %}
 
-                            </td>
+                            </div>
 
 
-                            <td>
+                            <div class="vc-ai-history-final">
+
+                                <span class="vc-ai-history-review-label">
+                                    FINAL DIAGNOSIS
+                                </span>
+
 
                                 {% if analysis.final_diagnosis %}
 
-                                    {{ analysis.final_diagnosis }}
+                                    <strong>
+                                        {{ analysis.final_diagnosis }}
+                                    </strong>
 
                                 {% else %}
 
-                                    <span class="text-muted">
+                                    <span class="vc-ai-history-not-recorded">
                                         Not recorded
                                     </span>
 
                                 {% endif %}
 
-                            </td>
+                            </div>
 
 
-                            <td>
+                            {% if analysis.appointment %}
 
-                                {% if analysis.appointment %}
+                                <a
+                                    href="/ai/?appointment_id={{ analysis.appointment.pk }}"
+                                    class="vc-ai-history-view"
+                                >
+                                    View Analysis
+                                    <i class="fa fa-arrow-right"></i>
+                                </a>
 
-                                    <a
-                                        href="/ai/?appointment_id={{ analysis.appointment.pk }}"
-                                        class="btn btn-info btn-sm"
-                                    >
-                                        View Analysis
-                                    </a>
+                            {% else %}
 
-                                {% else %}
+                                <span class="vc-ai-history-unavailable">
+                                    Analysis unavailable
+                                </span>
 
-                                    <span class="text-muted">
-                                        Unavailable
-                                    </span>
+                            {% endif %}
 
-                                {% endif %}
 
-                            </td>
+                        </div>
 
-                        </tr>
 
-                    {% endfor %}
+                    </div>
 
-                </tbody>
+                </article>
 
-            </table>
+            {% endfor %}
 
-        {% else %}
+        </div>
 
-            <div class="alert alert-info">
-                No AI assessments are available yet.
+
+    {% else %}
+
+        <!-- =================================================
+             EMPTY STATE
+             ================================================= -->
+
+        <div class="vc-ai-history-empty">
+
+            <div class="vc-ai-history-empty-icon">
+
+                <i class="fa fa-magic"></i>
+
             </div>
 
-        {% endif %}
 
-    </div>
+            <h3>
+                No AI assessments yet
+            </h3>
+
+
+            <p>
+                AI-assisted assessments will appear here
+                once an analysis has been completed.
+            </p>
+
+
+            <a
+                href="/ai/"
+                class="btn btn-primary"
+            >
+                Start AI Health Check
+                <i class="fa fa-arrow-right"></i>
+            </a>
+
+        </div>
+
+    {% endif %}
 
 </div>
-
-
-<script>
-
-$(document).ready(function() {
-
-    $('#ai-history-table').DataTable();
-
-});
-
-</script>
 
 {% endblock %}
