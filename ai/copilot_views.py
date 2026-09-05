@@ -92,7 +92,8 @@ def copilot(request):
             "content": message.content,
         }
         for message in conversation.messages.order_by("created")
-        if message.pk != conversation.messages.order_by("-created").first().pk
+        if message.pk
+        != conversation.messages.order_by("-created").first().pk
     ]
 
     prompt = f"""
@@ -155,8 +156,6 @@ When the user asks to cancel an appointment:
 - Provide the appointment ID.
 - Never cancel an appointment without explicit confirmation.
 
-
-
 For appointment-related questions:
 - Include one link for every relevant appointment.
 - Use the exact appointment URL provided in the appointment data.
@@ -194,11 +193,23 @@ Rules:
     action = result.get("action")
 
     if action and action.get("tool"):
-        tool_name = action.get("tool")
-        tool_definition = COPILOT_TOOL_DEFINITIONS.get(tool_name)
 
-        if tool_definition and tool_name in available_tools:
-            tool_arguments = action.get("arguments", {}) or {}
+        tool_name = action.get("tool")
+
+        tool_definition = COPILOT_TOOL_DEFINITIONS.get(
+            tool_name
+        )
+
+        if (
+            tool_definition
+            and tool_name in available_tools
+        ):
+
+            tool_arguments = (
+                action.get("arguments", {})
+                or {}
+            )
+
             tool_result = tool_definition["handler"](
                 request,
                 **tool_arguments
@@ -206,40 +217,150 @@ Rules:
 
             result["tool_result"] = tool_result
 
-            if tool_name in ["prepare_reschedule", "prepare_cancel"] and tool_result.get("requires_confirmation"):
-                result["confirmation"] = tool_result["data"]
-                result["confirmation"]["action"] = tool_name
+            # -------------------------------------------------
+            # Appointment confirmation actions
+            # -------------------------------------------------
 
-            if tool_name == "get_appointment" and tool_result.get("success"):
+            if (
+                tool_name in [
+                    "prepare_reschedule",
+                    "prepare_cancel",
+                ]
+                and tool_result.get(
+                    "requires_confirmation"
+                )
+            ):
+                result["confirmation"] = (
+                    tool_result["data"]
+                )
+
+                result["confirmation"]["action"] = (
+                    tool_name
+                )
+
+            # -------------------------------------------------
+            # Prescription lookup
+            # -------------------------------------------------
+
+            if (
+                tool_name == "get_prescriptions"
+                and tool_result.get("success")
+            ):
+
+                prescriptions = (
+                    tool_result.get("data", [])
+                )
+
+                role = context["role"]
+
+                if not prescriptions:
+
+                    if role == "Doctor":
+                        result["message"] = (
+                            "You currently have not "
+                            "prescribed any prescriptions."
+                        )
+                    else:
+                        result["message"] = (
+                            "You currently have no prescriptions."
+                        )
+
+                else:
+
+                    if role == "Doctor":
+                        lines = [
+                            "Here are the prescriptions "
+                            "you have prescribed:\n"
+                        ]
+                    else:
+                        lines = [
+                            "Here are your prescriptions:\n"
+                        ]
+
+                    for p in prescriptions:
+
+                        status = (
+                            "Active"
+                            if p["active"]
+                            else "Inactive"
+                        )
+
+                        if role == "Doctor":
+
+                            lines.append(
+                                f"• {p['medication']} — "
+                                f"{p['strength']}\n"
+                                f"  Patient: {p['patient']}\n"
+                                f"  {p['instruction']}\n"
+                                f"  Refills: {p['refill']} · "
+                                f"{status} · "
+                                f"{p['date']}"
+                            )
+
+                        else:
+
+                            lines.append(
+                                f"• {p['medication']} — "
+                                f"{p['strength']}\n"
+                                f"  {p['instruction']}\n"
+                                f"  Refills: {p['refill']} · "
+                                f"{status} · "
+                                f"{p['date']}"
+                            )
+
+                    result["message"] = (
+                        "\n\n".join(lines)
+                    )
+
+            # -------------------------------------------------
+            # Appointment lookup
+            # -------------------------------------------------
+
+            if (
+                tool_name == "get_appointment"
+                and tool_result.get("success")
+            ):
+
                 appointment = tool_result["data"]
 
                 start_time = datetime.fromisoformat(
                     appointment["start_time"]
                 )
+
                 end_time = datetime.fromisoformat(
                     appointment["end_time"]
                 )
 
-                readable_date = start_time.strftime("%B %d, %Y").replace(
-                    " 0", " "
+                readable_date = (
+                    start_time
+                    .strftime("%B %d, %Y")
+                    .replace(" 0", " ")
                 )
 
-                readable_start = start_time.strftime(
-                    "%I:%M %p"
-                ).lstrip("0")
+                readable_start = (
+                    start_time
+                    .strftime("%I:%M %p")
+                    .lstrip("0")
+                )
 
-                readable_end = end_time.strftime(
-                    "%I:%M %p"
-                ).lstrip("0")
+                readable_end = (
+                    end_time
+                    .strftime("%I:%M %p")
+                    .lstrip("0")
+                )
 
                 result["message"] = (
-                    f"Appointment #{appointment['id']} with "
+                    f"Appointment "
+                    f"#{appointment['id']} with "
                     f"{appointment['doctor']} for "
                     f"{appointment['patient']}.\n\n"
                     f"{readable_date} · "
-                    f"{readable_start} – {readable_end}\n"
-                    f"Status: {appointment['status']} · "
-                    f"Type: {appointment['type']}\n"
+                    f"{readable_start} – "
+                    f"{readable_end}\n"
+                    f"Status: "
+                    f"{appointment['status']} · "
+                    f"Type: "
+                    f"{appointment['type']}\n"
                     f"{appointment['symptom']} · "
                     f"{appointment['hospital']}"
                 )
@@ -247,19 +368,30 @@ Rules:
                 result["links"] = [
                     {
                         "label": (
-                            f"Open appointment #{appointment['id']}"
+                            f"Open appointment "
+                            f"#{appointment['id']}"
                         ),
                         "url": (
-                            f"/appointment/update/?pk={appointment['id']}"
+                            f"/appointment/update/"
+                            f"?pk={appointment['id']}"
                         ),
                     }
                 ]
 
+            # -------------------------------------------------
+            # Tool error handling
+            # -------------------------------------------------
+
             elif tool_result.get("success") is False:
+
                 result["message"] = tool_result.get(
                     "error",
-                    "I could not retrieve that appointment."
+                    "I could not complete that request.",
                 )
+
+    # ---------------------------------------------------------
+    # Save assistant response
+    # ---------------------------------------------------------
 
     CopilotMessage.objects.create(
         conversation=conversation,
@@ -274,6 +406,10 @@ Rules:
         update_fields=["updated"]
     )
 
+    # ---------------------------------------------------------
+    # Return response
+    # ---------------------------------------------------------
+
     return JsonResponse(
         {
             "message": result.get(
@@ -284,36 +420,10 @@ Rules:
                 "links",
                 []
             ),
-            "confirmation": result.get("confirmation"),
+            "confirmation": result.get(
+                "confirmation"
+            ),
             "conversation_id": conversation.pk,
             "context": context,
         }
     )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
