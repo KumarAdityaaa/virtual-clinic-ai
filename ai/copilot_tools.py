@@ -3,8 +3,8 @@
     get_my_appointments,
     get_user_role,
 )
-from server.models import MedicalInfo, MedicalTest, Prescription
-
+from django.db.models import Q
+from server.models import MedicalInfo, MedicalTest, Message, Prescription
 def tool_get_my_appointments(request):
     return {
         "success": True,
@@ -111,4 +111,33 @@ def tool_get_medical_info(request):
             "stroke": info.stroke,
             "comments": info.comments,
         },
+    }
+
+def tool_get_my_messages(request):
+    account = get_account_from_request(request)
+
+    messages = Message.objects.select_related(
+        "sender",
+        "target",
+    ).filter(
+        Q(sender=account, sender_deleted=False)
+        | Q(target=account, target_deleted=False)
+    ).order_by("-timestamp")
+
+    data = []
+
+    for message in messages:
+        data.append({
+            "id": message.id,
+            "sender": str(message.sender),
+            "target": str(message.target),
+            "header": message.header,
+            "body": message.body,
+            "timestamp": message.timestamp.isoformat(),
+        })
+
+    return {
+        "success": True,
+        "data": data,
+        "count": len(data),
     }

@@ -313,19 +313,29 @@ Rules:
                     )
 
             # -------------------------------------------------
-            # Appointment lookup
+            # Medical tests lookup
             # -------------------------------------------------
-            if tool_name == "get_medical_tests" and tool_result.get("success"):
+
+            if (
+                tool_name == "get_medical_tests"
+                and tool_result.get("success")
+            ):
+
                 tests = tool_result.get("data", [])
 
                 if not tests:
-                    result["message"] = "You currently have no medical tests."
+                    result["message"] = (
+                        "You currently have no medical tests."
+                    )
+
                 else:
+
                     role = context["role"]
 
                     if role == "Doctor":
                         lines = [
-                            "Here are the medical tests you have ordered:\n"
+                            "Here are the medical tests "
+                            "you have ordered:\n"
                         ]
                     else:
                         lines = [
@@ -333,6 +343,7 @@ Rules:
                         ]
 
                     for test in tests:
+
                         status = (
                             "Completed"
                             if test["completed"]
@@ -340,6 +351,7 @@ Rules:
                         )
 
                         if role == "Doctor":
+
                             lines.append(
                                 f"• {test['name']}\n"
                                 f"  Patient: {test['patient']}\n"
@@ -347,7 +359,9 @@ Rules:
                                 f"  {test['description']}\n"
                                 f"  Status: {status} · {test['date']}"
                             )
+
                         else:
+
                             lines.append(
                                 f"• {test['name']}\n"
                                 f"  Doctor: {test['doctor']}\n"
@@ -358,15 +372,28 @@ Rules:
 
                     result["message"] = "\n\n".join(lines)
 
-            if tool_name == "get_medical_info" and tool_result.get("success"):
+            # -------------------------------------------------
+            # Medical information lookup
+            # -------------------------------------------------
+
+            if (
+                tool_name == "get_medical_info"
+                and tool_result.get("success")
+            ):
+
                 info = tool_result.get("data")
 
                 if not info:
                     result["message"] = (
                         "No medical information is currently available."
                     )
+
                 else:
-                    allergies = info["allergy"] or "None recorded"
+
+                    allergies = (
+                        info["allergy"]
+                        or "None recorded"
+                    )
 
                     result["message"] = (
                         "Here is your medical information:\n\n"
@@ -383,6 +410,51 @@ Rules:
                         f"• Comments: "
                         f"{info['comments'] or 'None'}"
                     )
+
+            # -------------------------------------------------
+            # Messages lookup
+            # -------------------------------------------------
+
+            if (
+                tool_name == "get_my_messages"
+                and tool_result.get("success")
+            ):
+
+                messages = tool_result.get(
+                    "data",
+                    []
+                )
+
+                if not messages:
+
+                    result["message"] = (
+                        "You currently have no messages."
+                    )
+
+                else:
+
+                    lines = [
+                        "Here are your recent messages:\n"
+                    ]
+
+                    for message in messages:
+
+                        lines.append(
+                            f"• {message['header']}\n"
+                            f"  From: {message['sender']}\n"
+                            f"  To: {message['target']}\n"
+                            f"  {message['body']}\n"
+                            f"  {message['timestamp']}"
+                        )
+
+                    result["message"] = (
+                        "\n\n".join(lines)
+                    )
+
+            # -------------------------------------------------
+            # Appointment lookup
+            # -------------------------------------------------
+
             if (
                 tool_name == "get_appointment"
                 and tool_result.get("success")
