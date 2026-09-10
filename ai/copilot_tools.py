@@ -3,7 +3,7 @@
     get_my_appointments,
     get_user_role,
 )
-from server.models import Prescription
+from server.models import MedicalTest, Prescription
 
 
 def tool_get_my_appointments(request):
@@ -48,4 +48,45 @@ def tool_get_prescriptions(request):
         "success": True,
         "data": prescriptions,
         "count": len(prescriptions),
+    }
+
+def tool_get_medical_tests(request):
+    account = get_account_from_request(request)
+    role = get_user_role(account)
+
+    qs = MedicalTest.objects.select_related(
+        "patient",
+        "doctor",
+        "hospital",
+    )
+
+    if role == "Patient":
+        qs = qs.filter(patient=account, private=False)
+    elif role == "Doctor":
+        qs = qs.filter(doctor=account)
+    else:
+        return {
+            "success": False,
+            "error": "You do not have permission to view medical tests.",
+        }
+
+    tests = []
+
+    for test in qs.order_by("-date"):
+        tests.append({
+            "id": test.id,
+            "name": test.name,
+            "date": test.date.isoformat(),
+            "hospital": str(test.hospital),
+            "description": test.description,
+            "doctor": str(test.doctor),
+            "patient": str(test.patient),
+            "private": test.private,
+            "completed": test.completed,
+        })
+
+    return {
+        "success": True,
+        "data": tests,
+        "count": len(tests),
     }

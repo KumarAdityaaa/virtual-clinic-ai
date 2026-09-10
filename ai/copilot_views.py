@@ -315,7 +315,48 @@ Rules:
             # -------------------------------------------------
             # Appointment lookup
             # -------------------------------------------------
+            if tool_name == "get_medical_tests" and tool_result.get("success"):
+                tests = tool_result.get("data", [])
 
+                if not tests:
+                    result["message"] = "You currently have no medical tests."
+                else:
+                    role = context["role"]
+
+                    if role == "Doctor":
+                        lines = [
+                            "Here are the medical tests you have ordered:\n"
+                        ]
+                    else:
+                        lines = [
+                            "Here are your medical tests:\n"
+                        ]
+
+                    for test in tests:
+                        status = (
+                            "Completed"
+                            if test["completed"]
+                            else "Pending"
+                        )
+
+                        if role == "Doctor":
+                            lines.append(
+                                f"• {test['name']}\n"
+                                f"  Patient: {test['patient']}\n"
+                                f"  Hospital: {test['hospital']}\n"
+                                f"  {test['description']}\n"
+                                f"  Status: {status} · {test['date']}"
+                            )
+                        else:
+                            lines.append(
+                                f"• {test['name']}\n"
+                                f"  Doctor: {test['doctor']}\n"
+                                f"  Hospital: {test['hospital']}\n"
+                                f"  {test['description']}\n"
+                                f"  Status: {status} · {test['date']}"
+                            )
+
+                    result["message"] = "\n\n".join(lines)
             if (
                 tool_name == "get_appointment"
                 and tool_result.get("success")
