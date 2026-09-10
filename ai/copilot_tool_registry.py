@@ -2,9 +2,16 @@
     tool_get_my_appointments,
     tool_get_prescriptions,
     tool_get_medical_tests,
+    tool_get_medical_info,
 )
-from .copilot_appointment_tools import tool_get_appointment, tool_prepare_reschedule, tool_confirm_reschedule, tool_prepare_cancel, tool_confirm_cancel
 
+from .copilot_appointment_tools import (
+    tool_get_appointment,
+    tool_prepare_reschedule,
+    tool_confirm_reschedule,
+    tool_prepare_cancel,
+    tool_confirm_cancel,
+)
 
 COPILOT_TOOL_DEFINITIONS = {
     "get_my_appointments": {
@@ -30,6 +37,13 @@ COPILOT_TOOL_DEFINITIONS = {
             "Doctor",
         ],
         "description": "Get the current user's medical tests.",
+    },
+    "get_medical_info": {
+        "handler": tool_get_medical_info,
+        "roles": [
+            "Patient",
+        ],
+        "description": "Get the current user's medical information.",
     },
     "confirm_cancel": {
         "handler": tool_confirm_cancel,

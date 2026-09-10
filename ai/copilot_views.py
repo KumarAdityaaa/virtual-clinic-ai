@@ -357,6 +357,32 @@ Rules:
                             )
 
                     result["message"] = "\n\n".join(lines)
+
+            if tool_name == "get_medical_info" and tool_result.get("success"):
+                info = tool_result.get("data")
+
+                if not info:
+                    result["message"] = (
+                        "No medical information is currently available."
+                    )
+                else:
+                    allergies = info["allergy"] or "None recorded"
+
+                    result["message"] = (
+                        "Here is your medical information:\n\n"
+                        f"• Blood Type: {info['blood_type']}\n"
+                        f"• Allergies: {allergies}\n"
+                        f"• Alzheimer: "
+                        f"{'Yes' if info['alzheimer'] else 'No'}\n"
+                        f"• Asthma: "
+                        f"{'Yes' if info['asthma'] else 'No'}\n"
+                        f"• Diabetes: "
+                        f"{'Yes' if info['diabetes'] else 'No'}\n"
+                        f"• Stroke: "
+                        f"{'Yes' if info['stroke'] else 'No'}\n"
+                        f"• Comments: "
+                        f"{info['comments'] or 'None'}"
+                    )
             if (
                 tool_name == "get_appointment"
                 and tool_result.get("success")

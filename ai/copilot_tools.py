@@ -3,8 +3,7 @@
     get_my_appointments,
     get_user_role,
 )
-from server.models import MedicalTest, Prescription
-
+from server.models import MedicalInfo, MedicalTest, Prescription
 
 def tool_get_my_appointments(request):
     return {
@@ -89,4 +88,27 @@ def tool_get_medical_tests(request):
         "success": True,
         "data": tests,
         "count": len(tests),
+    }
+def tool_get_medical_info(request):
+    account = get_account_from_request(request)
+
+    try:
+        info = MedicalInfo.objects.get(account=account)
+    except MedicalInfo.DoesNotExist:
+        return {
+            "success": True,
+            "data": None,
+        }
+
+    return {
+        "success": True,
+        "data": {
+            "blood_type": info.bloodType,
+            "allergy": info.allergy,
+            "alzheimer": info.alzheimer,
+            "asthma": info.asthma,
+            "diabetes": info.diabetes,
+            "stroke": info.stroke,
+            "comments": info.comments,
+        },
     }
